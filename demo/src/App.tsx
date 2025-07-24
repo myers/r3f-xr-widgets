@@ -36,7 +36,7 @@ function Scene() {
     useEffect(() => {
       // Set initial camera position based on distance
       const target = new Vector3(...windowProps.position)
-      camera.position.set(target.x, target.y + 1, target.z + cameraDistance)
+      camera.position.set(target.x, 1.6, target.z + cameraDistance)
       camera.lookAt(target)
     }, [])
     
@@ -164,7 +164,7 @@ function App() {
       
       <Canvas
         shadows
-        camera={{ position: [0, 1, 3], fov: 50 }}
+        camera={{ position: [0, 1.6, 3], fov: 50 }}
         events={noEvents}
         style={{ background: '#000' }}
       >
