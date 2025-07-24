@@ -76,14 +76,18 @@ function Scene() {
         minY={-0.3}
       >
         {/* Content inside the window */}
-        <DemoContent />
+        <DemoContent aspectRatio={windowProps.aspectRatio} baseScale={windowProps.baseScale} />
       </ResizableWindow>
     </>
   )
 }
 
-function DemoContent() {
+function DemoContent({ aspectRatio = 16/9, baseScale = 0.3 }: { aspectRatio?: number, baseScale?: number }) {
   const [bgColor, setBgColor] = useState('#1a1a1a')
+  
+  // Calculate dimensions based on aspect ratio
+  const contentWidth = 1000 * baseScale * aspectRatio
+  const contentHeight = 1000 * baseScale
   
   return (
     <group>
@@ -97,8 +101,8 @@ function DemoContent() {
         anchorY="center"
       >
         <Container
-          width={400}
-          height={300}
+          width={contentWidth}
+          height={contentHeight}
           backgroundColor={bgColor}
           flexDirection="column"
           alignItems="center"
