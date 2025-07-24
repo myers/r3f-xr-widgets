@@ -73,6 +73,7 @@ function Scene() {
       {/* Resizable Window */}
       <ResizableWindow
         {...windowProps}
+        minY={-0.3}
       >
         {/* Content inside the window */}
         <DemoContent />

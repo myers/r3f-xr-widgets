@@ -27,6 +27,7 @@ interface ResizableWindowProps {
   aspectRatio?: number
   baseScale?: number
   handleColor?: string | number
+  minY?: number
 }
 
 function RotateGeometry() {
@@ -44,7 +45,8 @@ export const ResizableWindow = forwardRef<Group, ResizableWindowProps>(({
   onScaleChange,
   aspectRatio = 16 / 9,
   baseScale = 0.3,
-  handleColor = 'grey'
+  handleColor = 'grey',
+  minY
 }, ref) => {
   const groupRef = useRef<Group>(null)
   const rotatingGroupRef = useRef<Group>(null)
@@ -53,6 +55,19 @@ export const ResizableWindow = forwardRef<Group, ResizableWindowProps>(({
   const [windowPosition, setWindowPosition] = useState(position)
   const camera = useThree((state) => state.camera)
   const [hasInitiallyRotated, setHasInitiallyRotated] = useState(false)
+
+  // Monitor position and enforce minY constraint
+  useFrame(() => {
+    if (minY !== undefined && groupRef.current) {
+      const worldPos = new Vector3()
+      groupRef.current.getWorldPosition(worldPos)
+      
+      if (worldPos.y < minY) {
+        const currentPos = groupRef.current.position
+        groupRef.current.position.y = minY - (worldPos.y - currentPos.y)
+      }
+    }
+  })
 
   // Auto-rotate to face camera
   useFrame((state, dt) => {
