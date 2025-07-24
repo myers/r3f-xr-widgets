@@ -1,7 +1,7 @@
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import { Box, Sphere, Cone, Environment } from '@react-three/drei'
-import { XR, XROrigin, createXRStore, PointerEvents, noEvents } from '@react-three/xr'
-import { useControls, folder } from 'leva'
+import { XR, XROrigin, createXRStore, PointerEvents, noEvents, useXR } from '@react-three/xr'
+import { useControls, folder, Leva } from 'leva'
 import { ResizableWindow, AudioEffects } from 'r3f-xr-widgets'
 import { useMemo, useState, useRef, useEffect } from 'react'
 import { Root, Container, Text } from '@react-three/uikit'
@@ -11,6 +11,8 @@ import { OrbitHandles } from '@react-three/handle'
 const store = createXRStore({ emulate: { syntheticEnvironment: false } })
 
 function Scene() {
+  const isInXR = useXR((state) => state.session !== null)
+  
   const { 
     enableAudio,
     cameraDistance,
@@ -20,7 +22,7 @@ function Scene() {
     cameraDistance: { value: 1, min: 1, max: 10, step: 0.1 },
     
     'Window Properties': folder({
-      position: { value: [0, 0, -0.8], step: 0.1 },
+      position: { value: [0, 1.6, -0.8], step: 0.1 },
       handleColor: '#ff9999',
       autoRotateToCamera: false,
       initiallyRotateTowardsCamera: true,
@@ -73,7 +75,7 @@ function Scene() {
       {/* Resizable Window */}
       <ResizableWindow
         {...windowProps}
-        minY={-0.3}
+        minY={0.5}
       >
         {/* Content inside the window */}
         <DemoContent aspectRatio={windowProps.aspectRatio} baseScale={windowProps.baseScale} />
@@ -141,30 +143,42 @@ function DemoContent({ aspectRatio = 16/9, baseScale = 0.3 }: { aspectRatio?: nu
 }
 
 function App() {
+  const [isInXR, setIsInXR] = useState(false)
+  
+  useEffect(() => {
+    const unsubscribe = store.subscribe((state) => {
+      setIsInXR(state.session !== null)
+    })
+    return unsubscribe
+  }, [])
+  
   return (
     <>
-      <button 
-        style={{
-          position: 'absolute',
-          bottom: '1rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          padding: '0.5rem 1.5rem',
-          fontSize: '1rem',
-          background: 'white',
-          border: 'none',
-          borderRadius: '0.25rem',
-          cursor: 'pointer',
-          zIndex: 1000,
-        }}
-        onClick={() => store.enterVR()}
-      >
-        Enter VR
-      </button>
+      <Leva hidden={isInXR} />
+      {!isInXR && (
+        <button 
+          style={{
+            position: 'absolute',
+            bottom: '1rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            padding: '0.5rem 1.5rem',
+            fontSize: '1rem',
+            background: 'white',
+            border: 'none',
+            borderRadius: '0.25rem',
+            cursor: 'pointer',
+            zIndex: 1000,
+          }}
+          onClick={() => store.enterVR()}
+        >
+          Enter VR
+        </button>
+      )}
       
       <Canvas
         shadows
-        camera={{ position: [0, 1, 3], fov: 50 }}
+        camera={{ position: [0, 1.6, 3], fov: 50 }}
         events={noEvents}
         style={{ background: '#000' }}
       >
