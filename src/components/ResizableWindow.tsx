@@ -140,73 +140,10 @@ export const ResizableWindow = forwardRef<Group, ResizableWindowProps>(({
           </group>
           
           {/* Move handle (bottom) */}
-          <HandleWithAudio 
-            targetRef={groupRef} 
-            ref={storeRef} 
-            scale={false} 
-            multitouch={false} 
-            rotate={false}
-            apply={(state, target) => {
-              if (state.first) {
-                // On first interaction, we don't want to move the window
-                return
-              }
-              
-              const currentPos = [...windowPosition] as [number, number, number]
-              let newPos: [number, number, number]
-              
-              // Check if shift key is held
-              const isShiftHeld = state.event?.shiftKey || false
-              
-              if (isShiftHeld) {
-                // When shift is held, handle follows mouse but window moves along camera direction
-                
-                // First, apply the handle movement to make it follow the mouse
-                defaultApply(state, target)
-                
-                // Get the delta from handle movement
-                const delta = state.current.position.clone().sub(state.previous.position)
-                
-                // Get window world position
-                const windowWorldPos = new Vector3(...currentPos)
-                
-                // Get camera world position
-                camera.getWorldPosition(vectorHelper3)
-                
-                // Calculate direction from window to camera
-                const cameraDir = vectorHelper3.sub(windowWorldPos).normalize()
-                
-                // Move along camera direction based on vertical drag
-                // Invert Y delta for intuitive control: drag up = move closer, drag down = move away
-                const moveDistance = -delta.y
-                const movement = cameraDir.multiplyScalar(moveDistance)
-                
-                newPos = [
-                  currentPos[0] + movement.x,
-                  currentPos[1] + movement.y,
-                  currentPos[2] + movement.z
-                ]
-              } else {
-                // Normal movement (X and Y only)
-                const delta = state.current.position.clone().sub(state.previous.position)
-                newPos = [
-                  currentPos[0] + delta.x,
-                  currentPos[1] + delta.y,
-                  currentPos[2] + delta.z
-                ]
-              }
-              
-              setWindowPosition(newPos)
-              onPositionChange?.(state.current.position)
-            }}
-          >
+          <HandleWithAudio targetRef="from-context" ref={storeRef} scale={false} multitouch={false} rotate={false}>
             <Hover>
               {(hovered) => (
-                <RoundedBox 
-                  position-y={-0.05}
-                  scale={[(hovered ? 0.125 : 0.1) * baseScale, (hovered ? 0.125 : 0.1) * baseScale, (hovered ? 0.125 : 0.1) * baseScale]} 
-                  args={[2, 0.2, 0.2]}
-                >
+                <RoundedBox scale={hovered ? 0.125 : 0.1} args={[2, 0.2, 0.2]}>
                   <meshStandardMaterial
                     emissiveIntensity={hovered ? 0.3 : 0}
                     emissive={0xffffff}
