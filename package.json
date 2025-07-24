@@ -1,0 +1,67 @@
+{
+  "name": "r3f-xr-widgets",
+  "version": "0.1.0",
+  "description": "Reusable XR widgets for React Three Fiber",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./assets/*": "./dist/assets/*"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "demo": "cd demo && vite --host",
+    "demo:build": "cd demo && vite build",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "keywords": [
+    "react",
+    "three",
+    "react-three-fiber",
+    "xr",
+    "vr",
+    "ar",
+    "widgets",
+    "components"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "@react-three/drei": ">=9.0.0",
+    "@react-three/fiber": ">=8.0.0",
+    "@react-three/handle": ">=6.0.0",
+    "@react-three/xr": ">=5.0.0",
+    "react": ">=18",
+    "three": ">=0.150.0"
+  },
+  "devDependencies": {
+    "@react-three/drei": "^10.5.2",
+    "@react-three/fiber": "^8.18.0",
+    "@react-three/handle": "^6.6.20",
+    "@react-three/xr": "^6.2.30",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.172.0",
+    "@vitejs/plugin-basic-ssl": "^1.2.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "leva": "^0.9.35",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "three": "^0.172.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.6",
+    "vite-plugin-dts": "^4.0.0"
+  },
+  "packageManager": "pnpm@10.12.1"
+}

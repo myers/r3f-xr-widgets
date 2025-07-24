@@ -1,0 +1,27 @@
+{
+  "name": "r3f-xr-widgets-demo",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.5.2",
+    "@react-three/fiber": "^9.2.0",
+    "@react-three/handle": "^6.6.20",
+    "@react-three/uikit": "^0.8.21",
+    "@react-three/xr": "^6.6.20",
+    "leva": "^0.10.0",
+    "r3f-xr-widgets": "file:..",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "three": "^0.172.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-basic-ssl": "^2.1.0",
+    "vite": "^7.0.5"
+  }
+}
