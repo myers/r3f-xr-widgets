@@ -20,7 +20,7 @@ function Scene() {
     cameraDistance: { value: 1, min: 1, max: 10, step: 0.1 },
     
     'Window Properties': folder({
-      position: { value: [0, 1.2, -0.8], step: 0.1 },
+      position: { value: [0, 0.9, -0.6], step: 0.1 },
       handleColor: '#ff9999',
       autoRotateToCamera: false,
       initiallyRotateTowardsCamera: true,
@@ -164,7 +164,7 @@ function App() {
       
       <Canvas
         shadows
-        camera={{ position: [0, 1.2, 3], fov: 50 }}
+        camera={{ position: [0, 1, 3], fov: 50 }}
         events={noEvents}
         style={{ background: '#000' }}
       >

@@ -1,6 +1,6 @@
 import { RoundedBox, useGLTF } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
-import { ReactNode, RefObject, forwardRef, useRef, useState, ComponentPropsWithoutRef } from 'react'
+import { ReactNode, RefObject, forwardRef, useRef, useState, useEffect, ComponentPropsWithoutRef } from 'react'
 import { Euler, Group, Mesh, Object3D, Quaternion, Vector3 } from 'three'
 import { damp } from 'three/src/math/MathUtils.js'
 import { HandleTarget, HandleStore, defaultApply } from '@react-three/handle'
@@ -56,6 +56,11 @@ export const ResizableWindow = forwardRef<Group, ResizableWindowProps>(({
   const camera = useThree((state) => state.camera)
   const [hasInitiallyRotated, setHasInitiallyRotated] = useState(false)
   const [currentScale, setCurrentScale] = useState(1)
+  
+  // Update position when prop changes
+  useEffect(() => {
+    setWindowPosition(position)
+  }, [position])
 
   // Monitor position and enforce minY constraint
   useFrame(() => {
