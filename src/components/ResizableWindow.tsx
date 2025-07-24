@@ -55,6 +55,7 @@ export const ResizableWindow = forwardRef<Group, ResizableWindowProps>(({
   const [windowPosition, setWindowPosition] = useState(position)
   const camera = useThree((state) => state.camera)
   const [hasInitiallyRotated, setHasInitiallyRotated] = useState(false)
+  const [currentScale, setCurrentScale] = useState(1)
 
   // Monitor position and enforce minY constraint
   useFrame(() => {
@@ -127,6 +128,7 @@ export const ResizableWindow = forwardRef<Group, ResizableWindowProps>(({
                 apply={(state, target) => {
                   defaultApply(state, target)
                   target.scale.z = state.current.scale.x
+                  setCurrentScale(state.current.scale.x)
                   onScaleChange?.(state.current.scale)
                 }}
                 scale={{ z: false, uniform: true }}
@@ -158,7 +160,7 @@ export const ResizableWindow = forwardRef<Group, ResizableWindowProps>(({
           <HandleWithAudio targetRef="from-context" ref={storeRef} scale={false} multitouch={false} rotate={false}>
             <Hover>
               {(hovered) => (
-                <RoundedBox scale={hovered ? 0.125 : 0.1} args={[2, 0.2, 0.2]}>
+                <RoundedBox scale={(hovered ? 0.125 : 0.1) * currentScale} args={[2, 0.2, 0.2]}>
                   <meshStandardMaterial
                     emissiveIntensity={hovered ? 0.3 : 0}
                     emissive={0xffffff}
