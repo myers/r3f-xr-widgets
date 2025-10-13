@@ -1,7 +1,7 @@
 {
   "name": "r3f-xr-widgets",
-  "version": "0.1.0",
-  "description": "Reusable XR widgets for React Three Fiber",
+  "version": "0.2.0",
+  "description": "Reusable XR/VR widgets and utilities for React Three Fiber - includes resizable windows, splash screens, and XR helper components",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -32,8 +32,13 @@
     "xr",
     "vr",
     "ar",
+    "webxr",
     "widgets",
-    "components"
+    "components",
+    "splash-screen",
+    "resizable",
+    "eye-level",
+    "utilities"
   ],
   "author": "",
   "license": "MIT",

@@ -26,7 +26,6 @@ interface ResizableWindowProps {
   aspectRatio?: number
   baseScale?: number
   handleColor?: string | number
-  minY?: number
 }
 
 function RotateGeometry() {
@@ -42,8 +41,7 @@ export function ResizableWindow({
   onScaleChange,
   aspectRatio = 16 / 9,
   baseScale = 0.3,
-  handleColor = 'grey',
-  minY
+  handleColor = 'grey'
 }: ResizableWindowProps) {
   const groupRef = useRef<Group>(null)
   const rotatingGroupRef = useRef<Group>(null)
