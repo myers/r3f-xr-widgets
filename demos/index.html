@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>r3f-xr-widgets - Demos</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 3rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.25rem;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    .description {
+      margin-bottom: 3rem;
+      color: #555;
+    }
+
+    .demos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .demo-card {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .demo-card:hover {
+      border-color: #667eea;
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+      transform: translateY(-4px);
+    }
+
+    .demo-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    .demo-card p {
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+
+    .demo-card .features {
+      list-style: none;
+      margin-bottom: 1.5rem;
+    }
+
+    .demo-card .features li {
+      padding: 0.5rem 0;
+      color: #555;
+      display: flex;
+      align-items: center;
+    }
+
+    .demo-card .features li:before {
+      content: "✓";
+      color: #667eea;
+      font-weight: bold;
+      margin-right: 0.5rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .github-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+
+    .github-link:hover {
+      color: #764ba2;
+    }
+
+    .coming-soon {
+      opacity: 0.6;
+      position: relative;
+    }
+
+    .coming-soon::after {
+      content: "Coming Soon";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #667eea;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    footer {
+      text-align: center;
+      color: #666;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>r3f-xr-widgets</h1>
+    <p class="subtitle">Reusable XR/VR widgets and utilities for React Three Fiber</p>
+
+    <div class="description">
+      <p>
+        A collection of production-ready components and utilities for building WebXR experiences with React Three Fiber.
+        Includes resizable windows, splash screens, eye-level positioning, and more.
+      </p>
+    </div>
+
+    <div class="demos-grid">
+      <div class="demo-card">
+        <h3>Resizable Window</h3>
+        <p>Interactive widget with drag-to-move and resize handles, audio feedback, and haptic responses.</p>
+        <ul class="features">
+          <li>Draggable with bottom handle</li>
+          <li>Resizable with top-right handle</li>
+          <li>Positional audio feedback</li>
+          <li>XR haptic responses</li>
+          <li>Scale-independent handles</li>
+        </ul>
+        <a href="./widgets/" class="btn">Launch Demo</a>
+      </div>
+
+      <div class="demo-card coming-soon">
+        <h3>Splash Screen & Utilities</h3>
+        <p>Showcase of SplashScreen, EyeLevelGroup, and other utility components.</p>
+        <ul class="features">
+          <li>AR/VR mode selection</li>
+          <li>Auto eye-level positioning</li>
+          <li>Session state management</li>
+          <li>GitHub badge component</li>
+        </ul>
+        <a href="#" class="btn" style="pointer-events: none; opacity: 0.5;">Coming Soon</a>
+      </div>
+
+      <div class="demo-card coming-soon">
+        <h3>High-Quality UI (XRLayers)</h3>
+        <p>Demonstrate crisp UI rendering using XRLayers for text and interactive content.</p>
+        <ul class="features">
+          <li>XRLayer vs texture comparison</li>
+          <li>Sharp text rendering</li>
+          <li>Reduced GPU usage</li>
+          <li>Lower latency</li>
+        </ul>
+        <a href="#" class="btn" style="pointer-events: none; opacity: 0.5;">Coming Soon</a>
+      </div>
+    </div>
+
+    <footer>
+      <a href="https://github.com/myers/r3f-xr-widgets" class="github-link">
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+          <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        View on GitHub
+      </a>
+      <p style="margin-top: 1rem; font-size: 0.9rem;">
+        Built with React Three Fiber, @react-three/xr, and @react-three/drei
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

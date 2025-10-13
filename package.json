@@ -22,6 +22,7 @@
     "build": "vite build",
     "demo": "cd demos/widgets && vite --host",
     "demo:widgets": "cd demos/widgets && vite --host",
+    "demo:landing": "npx vite demos --host",
     "demo:build": "cd demos/widgets && vite build",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm build"

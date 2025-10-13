@@ -11,8 +11,10 @@ This is a library package (`r3f-xr-widgets`) that provides reusable XR/VR widget
 - `pnpm dev` - Build library in watch mode for development
 - `pnpm build` - Build the library for production (outputs to `dist/`)
 - `pnpm typecheck` - Run TypeScript type checking without emitting files
-- `pnpm demo` - Start the demo application dev server with HTTPS (required for XR)
-- `pnpm demo:build` - Build the demo application for production
+- `pnpm demo` - Start the widgets demo dev server with HTTPS (required for XR)
+- `pnpm demo:widgets` - Start the widgets demo (same as `pnpm demo`)
+- `pnpm demo:landing` - Serve the demos landing page
+- `pnpm demo:build` - Build demos for production
 
 ## Architecture
 
@@ -58,13 +60,23 @@ The library exports XR-ready React components and utilities from `src/index.ts`:
 
 5. **Asset Handling**: 3D models (`.glb`) and audio files (`.mp3`) are imported with `?url` suffix for Vite asset handling, then used with `useGLTF` and `PositionalAudio`.
 
-### Demo Application
+### Demo Applications
 
-The demo (`demo/` directory) showcases the widgets with:
+The demos (`demos/` directory) showcase the library components:
+
+**Demos Landing Page** (`demos/index.html`):
+- Overview of all available demos
+- Links to individual demo applications
+- Run with `pnpm demo:landing`
+
+**Widgets Demo** (`demos/widgets/`):
+- Showcases ResizableWindow component
 - XR store setup with `createXRStore` from `@react-three/xr`
+- SplashScreen for VR/AR entry
 - HTTPS dev server (required for WebXR)
 - UIKit integration for 2D content inside windows
-- Camera positioned at eye level (1.5m) with window positioned to be centered in view
+- Camera positioned at eye level (1.5m)
+- Run with `pnpm demo` or `pnpm demo:widgets`
 
 ## Build System
 
