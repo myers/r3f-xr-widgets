@@ -14,7 +14,6 @@
     "@react-three/handle": "^6.6.20",
     "@react-three/uikit": "^0.8.21",
     "@react-three/xr": "^6.6.20",
-    "leva": "^0.10.0",
     "r3f-xr-widgets": "file:..",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -22,6 +21,6 @@
   },
   "devDependencies": {
     "@vitejs/plugin-basic-ssl": "^2.1.0",
-    "vite": "^7.0.5"
+    "vite": "^7.1.9"
   }
 }

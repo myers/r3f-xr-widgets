@@ -1,66 +1,38 @@
-import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { Box, Sphere, Cone, Environment } from '@react-three/drei'
-import { XR, XROrigin, createXRStore, PointerEvents, noEvents } from '@react-three/xr'
-import { useControls, folder } from 'leva'
+import { Canvas } from '@react-three/fiber'
+import { Environment } from '@react-three/drei'
+import { XR, createXRStore, PointerEvents, noEvents } from '@react-three/xr'
 import { ResizableWindow, AudioEffects } from 'r3f-xr-widgets'
-import { useMemo, useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { Root, Container, Text } from '@react-three/uikit'
-import { Vector3 } from 'three'
-import { OrbitHandles } from '@react-three/handle'
 
 const store = createXRStore({ emulate: { syntheticEnvironment: false } })
 
+// Default eye level for camera (in meters)
+const DEFAULT_EYE_LEVEL = 1.5
+
+function WindowDemo() {
+  return (
+    <ResizableWindow
+      position={[0, 1.5, -1]}
+      handleColor="#ff9999"
+      autoRotateToCamera={false}
+      initiallyRotateTowardsCamera={true}
+      aspectRatio={16/9}
+      baseScale={0.3}
+    >
+      <DemoContent aspectRatio={16/9} baseScale={0.3} />
+    </ResizableWindow>
+  )
+}
+
 function Scene() {
-  const { 
-    enableAudio,
-    cameraDistance,
-    ...windowProps 
-  } = useControls({
-    enableAudio: true,
-    cameraDistance: { value: 1, min: 1, max: 10, step: 0.1 },
-    
-    'Window Properties': folder({
-      position: { value: [0, 0.9, -0.6], step: 0.1 },
-      handleColor: '#ff9999',
-      autoRotateToCamera: false,
-      initiallyRotateTowardsCamera: true,
-      aspectRatio: { value: 16/9, min: 1, max: 2.5, step: 0.1 },
-      baseScale: { value: 0.3, min: 0.1, max: 1, step: 0.05 },
-    }),
-  })
-
-  // Camera distance controller  
-  const CameraController = () => {
-    const { camera } = useThree()
-    
-    useEffect(() => {
-      // Set initial camera position based on distance
-      const target = new Vector3(...windowProps.position)
-      camera.position.set(target.x, 1.6, target.z + cameraDistance)
-      camera.lookAt(target)
-    }, [])
-    
-    useFrame(() => {
-      // Update camera distance smoothly
-      const target = new Vector3(...windowProps.position)
-      const direction = new Vector3()
-      direction.subVectors(camera.position, target).normalize()
-      const newPosition = target.clone().add(direction.multiplyScalar(cameraDistance))
-      camera.position.lerp(newPosition, 0.1)
-    })
-    
-    return null
-  }
-
   return (
     <>
-      <CameraController />
-      <OrbitHandles damping />
-      
       {/* Lighting */}
       <ambientLight intensity={0.5} />
       <directionalLight position={[5, 5, 5]} intensity={1} castShadow />
-      
+      <Environment preset="city" />
+
       {/* Ground */}
       <mesh rotation-x={-Math.PI / 2} position-y={-0.5} receiveShadow>
         <planeGeometry args={[10, 10]} />
@@ -68,16 +40,10 @@ function Scene() {
       </mesh>
 
       {/* Audio Effects */}
-      {enableAudio && <AudioEffects />}
+      <AudioEffects />
 
       {/* Resizable Window */}
-      <ResizableWindow
-        {...windowProps}
-        minY={0.5}
-      >
-        {/* Content inside the window */}
-        <DemoContent aspectRatio={windowProps.aspectRatio} baseScale={windowProps.baseScale} />
-      </ResizableWindow>
+      <WindowDemo />
     </>
   )
 }
@@ -164,13 +130,12 @@ function App() {
       
       <Canvas
         shadows
-        camera={{ position: [0, 1.6, 3], fov: 50 }}
+        camera={{ position: [0, DEFAULT_EYE_LEVEL, 0], fov: 50, rotation: [0, 0, 0] }}
         events={noEvents}
         style={{ background: '#000' }}
       >
+        <PointerEvents />
         <XR store={store}>
-          <PointerEvents />
-          <XROrigin position={[0, 0, 0]} />
           <Scene />
         </XR>
       </Canvas>

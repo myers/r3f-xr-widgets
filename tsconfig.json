@@ -17,10 +17,10 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/assets.d.ts"],
   "exclude": ["node_modules", "dist", "demo"]
 }

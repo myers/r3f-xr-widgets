@@ -1,5 +1,5 @@
 import { PositionalAudio } from '@react-three/drei'
-import { ComponentPropsWithoutRef, forwardRef, RefObject, useRef } from 'react'
+import { ComponentPropsWithoutRef, forwardRef, RefObject } from 'react'
 import { PositionalAudio as PAudio, Object3D } from 'three'
 import { Handle, HandleState, HandleStore, defaultApply } from '@react-three/handle'
 import startSoundUrl from '../assets/sounds/start.mp3?url'

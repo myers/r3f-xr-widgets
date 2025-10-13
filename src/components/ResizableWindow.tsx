@@ -1,7 +1,7 @@
 import { RoundedBox, useGLTF } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
-import { ReactNode, RefObject, forwardRef, useRef, useState, useEffect, ComponentPropsWithoutRef } from 'react'
-import { Euler, Group, Mesh, Object3D, Quaternion, Vector3 } from 'three'
+import { useFrame } from '@react-three/fiber'
+import { ReactNode, useRef, useState, useEffect } from 'react'
+import { Euler, Group, Mesh, Quaternion, Vector3 } from 'three'
 import { damp } from 'three/src/math/MathUtils.js'
 import { HandleTarget, HandleStore, defaultApply } from '@react-three/handle'
 import { HandleWithAudio } from './HandleWithAudio'
@@ -13,7 +13,6 @@ const eulerHelper = new Euler()
 const quaternionHelper = new Quaternion()
 const vectorHelper1 = new Vector3()
 const vectorHelper2 = new Vector3()
-const vectorHelper3 = new Vector3()
 const zAxis = new Vector3(0, 0, 1)
 
 interface ResizableWindowProps {
@@ -35,25 +34,21 @@ function RotateGeometry() {
   return <primitive attach="geometry" object={(scene.children[2] as Mesh).geometry} />
 }
 
-export const ResizableWindow = forwardRef<Group, ResizableWindowProps>(({
+export function ResizableWindow({
   children,
   position = [0, 0, -0.4],
-  scale: initialScale = [0.3, 0.3, 0.3],
   initiallyRotateTowardsCamera = true,
   autoRotateToCamera = false,
-  onPositionChange,
   onScaleChange,
   aspectRatio = 16 / 9,
   baseScale = 0.3,
   handleColor = 'grey',
   minY
-}, ref) => {
+}: ResizableWindowProps) {
   const groupRef = useRef<Group>(null)
   const rotatingGroupRef = useRef<Group>(null)
   const storeRef = useRef<HandleStore<unknown>>(null)
-  const innerRef = ref || groupRef
   const [windowPosition, setWindowPosition] = useState(position)
-  const camera = useThree((state) => state.camera)
   const [hasInitiallyRotated, setHasInitiallyRotated] = useState(false)
   const [currentScale, setCurrentScale] = useState(1)
   
@@ -61,19 +56,6 @@ export const ResizableWindow = forwardRef<Group, ResizableWindowProps>(({
   useEffect(() => {
     setWindowPosition(position)
   }, [position])
-
-  // Monitor position and enforce minY constraint
-  useFrame(() => {
-    if (minY !== undefined && groupRef.current) {
-      const worldPos = new Vector3()
-      groupRef.current.getWorldPosition(worldPos)
-      
-      if (worldPos.y < minY) {
-        const currentPos = groupRef.current.position
-        groupRef.current.position.y = minY - (worldPos.y - currentPos.y)
-      }
-    }
-  })
 
   // Auto-rotate to face camera
   useFrame((state, dt) => {
@@ -98,8 +80,8 @@ export const ResizableWindow = forwardRef<Group, ResizableWindowProps>(({
     }
     
     // Only rotate if not being dragged
-    const isDragging = storeRef.current?.getState()?.active
-    if (isDragging) {
+    const handleState = storeRef.current?.getState()
+    if (handleState && handleState.current.pointerAmount > 0) {
       return
     }
     state.camera.getWorldPosition(vectorHelper1)
@@ -113,16 +95,16 @@ export const ResizableWindow = forwardRef<Group, ResizableWindowProps>(({
     <HandleTarget ref={groupRef}>
       <group position={windowPosition}>
         <group ref={rotatingGroupRef}>
-          <group position-y={0.05}>
+          <group>
             <HandleTarget>
               {/* Background plane */}
-              <mesh position-y={0.15} rotation-y={Math.PI}>
+              <mesh rotation-y={Math.PI}>
                 <planeGeometry args={[baseScale * aspectRatio, baseScale]} />
-                <meshBasicMaterial />
+                <meshBasicMaterial color="#222222" />
               </mesh>
-              
+
               {/* Content area - no scaling applied, just positioned */}
-              <group position-y={0.15}>
+              <group>
                 {children}
               </group>
               
@@ -144,8 +126,12 @@ export const ResizableWindow = forwardRef<Group, ResizableWindowProps>(({
                     <mesh
                       rotation-x={Math.PI / 2}
                       rotation-z={Math.PI}
-                      position={[(baseScale * aspectRatio / 2) + (hovered ? 0.035 : 0.03), hovered ? 0.325 : 0.32, 0]}
-                      scale={hovered ? 0.035 : 0.025}
+                      position={[
+                        (baseScale * aspectRatio / 2) + (hovered ? 0.035 : 0.03) / currentScale,
+                        (baseScale / 2) + (hovered ? 0.025 : 0.02) / currentScale,
+                        0
+                      ]}
+                      scale={(hovered ? 0.035 : 0.025) / currentScale}
                     >
                       <RotateGeometry />
                       <meshStandardMaterial
@@ -162,24 +148,24 @@ export const ResizableWindow = forwardRef<Group, ResizableWindowProps>(({
           </group>
           
           {/* Move handle (bottom) */}
-          <HandleWithAudio targetRef="from-context" ref={storeRef} scale={false} multitouch={false} rotate={false}>
-            <Hover>
-              {(hovered) => (
-                <RoundedBox scale={(hovered ? 0.125 : 0.1) * currentScale} args={[2, 0.2, 0.2]}>
-                  <meshStandardMaterial
-                    emissiveIntensity={hovered ? 0.3 : 0}
-                    emissive={0xffffff}
-                    toneMapped={false}
-                    color={handleColor}
-                  />
-                </RoundedBox>
-              )}
-            </Hover>
-          </HandleWithAudio>
+          <group position={[0, (-baseScale / 2 - 0.03) * currentScale, 0]}>
+            <HandleWithAudio targetRef="from-context" ref={storeRef} scale={false} multitouch={false} rotate={false}>
+              <Hover>
+                {(hovered) => (
+                  <RoundedBox scale={(hovered ? 0.125 : 0.1) * currentScale} args={[2, 0.2, 0.2]}>
+                    <meshStandardMaterial
+                      emissiveIntensity={hovered ? 0.3 : 0}
+                      emissive={0xffffff}
+                      toneMapped={false}
+                      color={handleColor}
+                    />
+                  </RoundedBox>
+                )}
+              </Hover>
+            </HandleWithAudio>
+          </group>
         </group>
       </group>
     </HandleTarget>
   )
-})
-
-ResizableWindow.displayName = 'ResizableWindow'
+}
