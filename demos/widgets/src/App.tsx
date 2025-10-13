@@ -1,7 +1,7 @@
 import { Canvas } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import { XR, createXRStore, PointerEvents, noEvents } from '@react-three/xr'
-import { ResizableWindow, AudioEffects } from 'r3f-xr-widgets'
+import { ResizableWindow, AudioEffects, SplashScreen, GitHubBadge } from 'r3f-xr-widgets'
 import { useState } from 'react'
 import { Root, Container, Text } from '@react-three/uikit'
 
@@ -109,25 +109,23 @@ function DemoContent({ aspectRatio = 16/9, baseScale = 0.3 }: { aspectRatio?: nu
 function App() {
   return (
     <>
-      <button 
-        style={{
-          position: 'absolute',
-          bottom: '1rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          padding: '0.5rem 1.5rem',
-          fontSize: '1rem',
-          background: 'white',
-          border: 'none',
-          borderRadius: '0.25rem',
-          cursor: 'pointer',
-          zIndex: 1000,
-        }}
-        onClick={() => store.enterVR()}
-      >
-        Enter VR
-      </button>
-      
+      <SplashScreen store={store}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', margin: '0 0 1rem 0' }}>
+          Resizable Window Demo
+        </h1>
+        <p style={{ margin: '0 0 1rem 0', lineHeight: '1.6' }}>
+          This demo showcases the <strong>ResizableWindow</strong> component - a draggable, resizable widget
+          for React Three Fiber XR applications.
+        </p>
+        <ul style={{ margin: '0 0 1rem 0', paddingLeft: '1.5rem', lineHeight: '1.8' }}>
+          <li><strong>Drag</strong> the bottom handle to move the window</li>
+          <li><strong>Drag</strong> the top-right handle to resize</li>
+          <li><strong>Click</strong> the button to change colors</li>
+          <li><strong>Haptic feedback</strong> and audio on interaction</li>
+        </ul>
+        <GitHubBadge repoUrl="https://github.com/myers/r3f-xr-widgets" />
+      </SplashScreen>
+
       <Canvas
         shadows
         camera={{ position: [0, DEFAULT_EYE_LEVEL, 0], fov: 50, rotation: [0, 0, 0] }}

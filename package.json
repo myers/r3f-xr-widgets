@@ -20,8 +20,9 @@
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build",
-    "demo": "cd demo && vite --host",
-    "demo:build": "cd demo && vite build",
+    "demo": "cd demos/widgets && vite --host",
+    "demo:widgets": "cd demos/widgets && vite --host",
+    "demo:build": "cd demos/widgets && vite build",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm build"
   },
