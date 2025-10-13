@@ -7,4 +7,7 @@ export default defineConfig({
   resolve: {
     dedupe: ['@react-three/fiber', 'three', 'react', 'react-dom'],
   },
+  server: {
+    port: 5273,
+  },
 })

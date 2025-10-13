@@ -22,7 +22,7 @@
     "build": "vite build",
     "demo": "cd demos/widgets && vite --host",
     "demo:widgets": "cd demos/widgets && vite --host",
-    "demo:landing": "npx vite demos --host",
+    "demo:landing": "npx vite demos --host --port 5173",
     "demo:build": "cd demos/widgets && vite build",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm build"

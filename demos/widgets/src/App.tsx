@@ -1,7 +1,7 @@
 import { Canvas } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import { XR, createXRStore, PointerEvents, noEvents } from '@react-three/xr'
-import { ResizableWindow, AudioEffects, SplashScreen, GitHubBadge } from 'r3f-xr-widgets'
+import { ResizableWindow, AudioEffects, SplashScreen, GitHubBadge } from '../../../src/index'
 import { useState } from 'react'
 import { Root, Container, Text } from '@react-three/uikit'
 
