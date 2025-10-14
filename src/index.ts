@@ -13,3 +13,4 @@ export { useXRSessionModeSupportedPolling } from './hooks/useXRSessionModeSuppor
 
 // Utilities
 export { vibrateOnEvent } from './utils/vibrateOnEvent'
+export type { PulseConfig } from './utils/vibrateOnEvent'
