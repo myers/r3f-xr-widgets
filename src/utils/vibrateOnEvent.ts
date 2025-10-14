@@ -1,3 +1,10 @@
+/**
+ * Haptic feedback utility for XR controllers
+ *
+ * Adapted from @react-three/xr editor example
+ * Original: https://github.com/pmndrs/xr/tree/main/examples/editor
+ */
+
 import { isXRInputSourceState } from '@react-three/xr'
 
 export function vibrateOnEvent(e: any) {

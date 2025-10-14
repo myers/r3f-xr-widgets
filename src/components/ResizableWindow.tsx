@@ -1,3 +1,10 @@
+/**
+ * ResizableWindow component
+ *
+ * Adapted from @react-three/xr editor example
+ * Original: https://github.com/pmndrs/xr/tree/main/examples/editor
+ */
+
 import { RoundedBox, useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { ReactNode, useRef, useState, useEffect } from 'react'

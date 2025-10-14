@@ -13,12 +13,14 @@ export default defineConfig({
   ],
   assetsInclude: ['**/*.glb', '**/*.mp3'],
   build: {
+    copyPublicDir: false,
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'R3FXRWidgets',
       formats: ['es', 'cjs'],
       fileName: (format) => `index.${format === 'es' ? 'js' : 'cjs'}`,
     },
+    assetsDir: 'assets',
     rollupOptions: {
       external: [
         'react',

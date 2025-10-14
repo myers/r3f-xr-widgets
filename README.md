@@ -300,7 +300,10 @@ MIT © Myers Carpenter
 
 ## Acknowledgments
 
-Built with:
+**Core Components Attribution:**
+The `ResizableWindow`, `HandleWithAudio`, and `vibrateOnEvent` utilities were adapted from the [@react-three/xr editor example](https://github.com/pmndrs/xr/tree/main/examples/editor). We're grateful to the pmndrs team for their excellent work on WebXR tooling.
+
+**Built with:**
 - [React Three Fiber](https://docs.pmnd.rs/react-three-fiber) - React renderer for Three.js
 - [@react-three/xr](https://github.com/pmndrs/xr) - WebXR hooks and components
 - [@react-three/drei](https://github.com/pmndrs/drei) - Useful helpers for R3F

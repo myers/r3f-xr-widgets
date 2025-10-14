@@ -1,3 +1,10 @@
+/**
+ * HandleWithAudio component and audio feedback utilities
+ *
+ * Adapted from @react-three/xr editor example
+ * Original: https://github.com/pmndrs/xr/tree/main/examples/editor
+ */
+
 import { PositionalAudio } from '@react-three/drei'
 import { ComponentPropsWithoutRef, forwardRef, RefObject } from 'react'
 import { PositionalAudio as PAudio, Object3D } from 'three'
