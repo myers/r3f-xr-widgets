@@ -3,16 +3,14 @@
   "version": "0.2.0",
   "description": "Reusable XR/VR widgets and utilities for React Three Fiber - includes resizable windows, splash screens, and XR helper components",
   "type": "module",
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "./assets/*": "./dist/assets/*"
+      "import": "./dist/index.js"
+    }
   },
   "files": [
     "dist"

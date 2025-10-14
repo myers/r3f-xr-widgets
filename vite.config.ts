@@ -17,8 +17,8 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'R3FXRWidgets',
-      formats: ['es', 'cjs'],
-      fileName: (format) => `index.${format === 'es' ? 'js' : 'cjs'}`,
+      formats: ['es'],
+      fileName: () => 'index.js',
     },
     assetsDir: 'assets',
     rollupOptions: {
