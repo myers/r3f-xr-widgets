@@ -27,6 +27,9 @@ jobs:
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Install npm v11.6.2 (required for OIDC trusted publishing, min v11.5.1)
+        run: npm install -g npm@11.6.2
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -37,4 +40,4 @@ jobs:
         run: pnpm build
 
       - name: Publish to npm
-        run: pnpm publish --provenance --access public --no-git-checks
+        run: npm publish --provenance --access public
