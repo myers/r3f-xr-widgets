@@ -1,0 +1,33 @@
+# Development files
+CLAUDE.md
+.mcp.json
+PUBLISHING.md
+
+# Source code (only dist/ should be published)
+src/
+
+# Documentation (hosted separately)
+docs/
+
+# Demos
+demos/
+
+# Build configuration
+vite.config.ts
+tsconfig.json
+
+# GitHub
+.github/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+.claude/
+
+# Package manager
+pnpm-lock.yaml
+
+# Misc
+*.log
+.DS_Store
