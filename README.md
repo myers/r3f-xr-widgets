@@ -8,12 +8,16 @@ A collection of production-ready components and utilities for building WebXR exp
 
 ## Features
 
-- 🪟 **ResizableWindow** - Draggable, resizable 3D windows with audio feedback and haptic responses
-- 🚀 **SplashScreen** - Beautiful XR session entry with VR/AR mode selection
-- 👁️ **EyeLevelGroup** - Automatic eye-level positioning for comfortable viewing
-- 🎵 **Audio & Haptics** - Built-in positional audio and controller haptic feedback
-- 📱 **TypeScript** - Full type safety with TypeScript support
-- 🔧 **Modular** - Import only what you need
+- **ResizableWindow** - Draggable, resizable 3D windows with audio feedback and haptic responses
+- **SplashScreen** - Beautiful XR session entry with VR/AR mode selection
+- **EyeLevelGroup** - Automatic eye-level positioning for comfortable viewing
+- **Audio & Haptics** - Built-in positional audio and controller haptic feedback
+
+## Live Demos
+
+**[View Live Demos](https://icepick.info/r3f-xr-widgets/)** - Interactive examples of all components
+
+Try the demos in your VR headset or browser to see the components in action!
 
 ## Installation
 
@@ -67,9 +71,11 @@ function App() {
 
 ## Components
 
+See all components in action: **[Live Demos](https://icepick.info/r3f-xr-widgets/)**
+
 ### ResizableWindow
 
-An interactive 3D window with drag-to-move and resize handles.
+An interactive 3D window with drag-to-move and resize handles. **[Try it live →](https://icepick.info/r3f-xr-widgets/widgets)**
 
 ```tsx
 import { ResizableWindow } from 'r3f-xr-widgets'
@@ -87,6 +93,7 @@ import { ResizableWindow } from 'r3f-xr-widgets'
 ```
 
 **Props:**
+
 - `position` - Position in 3D space `[x, y, z]` (default: `[0, 0, -0.4]`)
 - `aspectRatio` - Width/height ratio (default: `16/9`)
 - `baseScale` - Base size of the window (default: `0.3`)
@@ -96,15 +103,16 @@ import { ResizableWindow } from 'r3f-xr-widgets'
 - `onScaleChange` - Callback when window is resized
 
 **Features:**
-- 🎯 Drag bottom handle to move
-- 📐 Drag top-right handle to resize
-- 🎵 Positional audio feedback on interaction
-- 📳 Haptic feedback on XR controllers
-- 🔄 Optional camera-facing rotation
+
+- Drag bottom handle to move
+- Drag top-right handle to resize
+- Positional audio feedback on interaction
+- Haptic feedback on XR controllers
+- Optional camera-facing rotation
 
 ### SplashScreen
 
-Full-screen overlay for entering XR sessions with automatic VR/AR detection.
+Full-screen overlay for entering XR sessions with automatic VR/AR detection. **[Try it live →](https://icepick.info/r3f-xr-widgets/widgets)**
 
 ```tsx
 import { SplashScreen } from 'r3f-xr-widgets'
@@ -119,15 +127,17 @@ const store = createXRStore()
 ```
 
 **Props:**
+
 - `store` - XR store from `createXRStore()` (required)
 - `children` - Content to display in the splash screen
 - `modes` - Array of XR modes to support (default: `['immersive-vr', 'immersive-ar']`)
 
 **Features:**
-- ✨ Automatically hides when XR session starts
-- 🔍 Detects VR/AR support
-- 🎨 Customizable content via children
-- 📱 Shows single or dual mode buttons
+
+- Automatically hides when XR session starts
+- Detects VR/AR support
+- Customizable content via children
+- Shows single or dual mode buttons
 
 ### EyeLevelGroup
 
@@ -145,13 +155,15 @@ import { EyeLevelGroup, DEFAULT_EYE_LEVEL } from 'r3f-xr-widgets'
 ```
 
 **Props:**
+
 - `defaultEyeLevel` - Default height when not in XR (typically `1.5` meters)
 - `children` - React Three Fiber components to position
 
 **Features:**
-- 👁️ Captures actual eye level when entering XR
-- 🎯 Uses default height in non-XR mode
-- 🔒 Captures once per session for stability
+
+- Captures actual eye level when entering XR
+- Uses default height in non-XR mode
+- Captures once per session for stability
 
 ### AudioEffects
 
@@ -208,6 +220,7 @@ import { vibrateOnEvent } from 'r3f-xr-widgets'
 ```
 
 **Parameters:**
+
 - `event` - Three.js pointer event
 - `intensity` - Vibration strength (0-1)
 - `duration` - Duration in milliseconds
@@ -304,6 +317,7 @@ MIT © Myers Carpenter
 The `ResizableWindow`, `HandleWithAudio`, and `vibrateOnEvent` utilities were adapted from the [@react-three/xr editor example](https://github.com/pmndrs/xr/tree/main/examples/editor). We're grateful to the pmndrs team for their excellent work on WebXR tooling.
 
 **Built with:**
+
 - [React Three Fiber](https://docs.pmnd.rs/react-three-fiber) - React renderer for Three.js
 - [@react-three/xr](https://github.com/pmndrs/xr) - WebXR hooks and components
 - [@react-three/drei](https://github.com/pmndrs/drei) - Useful helpers for R3F
@@ -311,6 +325,7 @@ The `ResizableWindow`, `HandleWithAudio`, and `vibrateOnEvent` utilities were ad
 
 ## Links
 
-- [Documentation](https://github.com/myers/r3f-xr-widgets)
-- [Examples](https://github.com/myers/r3f-xr-widgets/tree/main/demos)
+- [Live Demos](https://icepick.info/r3f-xr-widgets/)
+- [Documentation](https://icepick.info/r3f-xr-widgets/)
+- [Example Source Code](https://github.com/myers/r3f-xr-widgets/tree/main/demos)
 - [Issues](https://github.com/myers/r3f-xr-widgets/issues)

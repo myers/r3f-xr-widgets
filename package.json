@@ -22,13 +22,16 @@
     "demo:widgets": "cd demos/widgets && vite --host",
     "demo:landing": "npx vite demos --host --port 5173",
     "demo:build": "cd demos/widgets && vite build",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm build",
     "version:patch": "npm version patch",
     "version:minor": "npm version minor",
     "version:major": "npm version major",
     "release": "pnpm build && git push && git push --tags",
-    "publish:npm": "npm publish",
+    "publish:npm": "pnpm publish",
     "publish:check": "npm pack --dry-run"
   },
   "keywords": [
@@ -52,7 +55,7 @@
     "type": "git",
     "url": "https://github.com/myers/r3f-xr-widgets.git"
   },
-  "homepage": "https://github.com/myers/r3f-xr-widgets#readme",
+  "homepage": "https://icepick.info/r3f-xr-widgets/",
   "bugs": {
     "url": "https://github.com/myers/r3f-xr-widgets/issues"
   },
@@ -80,7 +83,8 @@
     "three": "^0.165.0",
     "typescript": "^5.7.2",
     "vite": "^7.1.9",
-    "vite-plugin-dts": "^4.5.4"
+    "vite-plugin-dts": "^4.5.4",
+    "vitepress": "^1.6.4"
   },
   "packageManager": "pnpm@10.12.1"
 }

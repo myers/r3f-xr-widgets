@@ -3,18 +3,51 @@ import { useXR } from '@react-three/xr'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 
-// Default eye level for camera and panel positioning (in meters)
+/**
+ * Default eye level height in meters (1.5m).
+ * Used for positioning UI elements at a comfortable viewing height.
+ *
+ * @example
+ * ```tsx
+ * import { DEFAULT_EYE_LEVEL } from 'r3f-xr-widgets'
+ *
+ * <mesh position={[0, DEFAULT_EYE_LEVEL, -1]} />
+ * ```
+ */
 export const DEFAULT_EYE_LEVEL = 1.5
 
+/**
+ * Props for the EyeLevelGroup component
+ */
 interface EyeLevelGroupProps {
+  /** React children to position at eye level */
   children: ReactNode
+  /** Fallback eye level height in meters when not in XR session */
   defaultEyeLevel: number
 }
 
 /**
- * Positions its children at the user's eye level in XR.
- * Captures the camera height once when entering an XR session.
- * Falls back to defaultEyeLevel when not in a session.
+ * Positions its children at the user's actual eye level in XR.
+ *
+ * In XR mode, captures the camera's Y position once when entering a session
+ * to determine the user's actual eye level. Outside of XR, uses the provided
+ * default eye level.
+ *
+ * This component is useful for ensuring UI elements and content are positioned
+ * at a comfortable viewing height for each individual user, accounting for
+ * differences in height and play space setup.
+ *
+ * @example
+ * ```tsx
+ * import { EyeLevelGroup, DEFAULT_EYE_LEVEL } from 'r3f-xr-widgets'
+ *
+ * <EyeLevelGroup defaultEyeLevel={DEFAULT_EYE_LEVEL}>
+ *   <mesh position={[0, 0, -1]}>
+ *     <boxGeometry />
+ *     <meshStandardMaterial />
+ *   </mesh>
+ * </EyeLevelGroup>
+ * ```
  */
 export function EyeLevelGroup({ children, defaultEyeLevel }: EyeLevelGroupProps) {
   const session = useXR((state) => state.session)

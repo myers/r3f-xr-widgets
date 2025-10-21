@@ -1,8 +1,39 @@
 /**
- * ResizableWindow component
+ * An interactive 3D window component with drag-to-move and resize handles.
+ *
+ * Features:
+ * - Drag the bottom handle to move the window in 3D space
+ * - Drag the top-right handle to resize the window
+ * - Positional audio feedback on interaction
+ * - Haptic feedback on XR controllers
+ * - Optional camera-facing rotation (initial or continuous)
+ *
+ * @example
+ * ```tsx
+ * import { ResizableWindow, AudioEffects } from 'r3f-xr-widgets'
+ *
+ * function Scene() {
+ *   return (
+ *     <>
+ *       <AudioEffects />
+ *       <ResizableWindow
+ *         position={[0, 1.5, -1]}
+ *         aspectRatio={16/9}
+ *         baseScale={0.3}
+ *         handleColor="hotpink"
+ *       >
+ *         <mesh>
+ *           <boxGeometry />
+ *           <meshStandardMaterial />
+ *         </mesh>
+ *       </ResizableWindow>
+ *     </>
+ *   )
+ * }
+ * ```
  *
  * Adapted from @react-three/xr editor example
- * Original: https://github.com/pmndrs/xr/tree/main/examples/editor
+ * @see {@link https://github.com/pmndrs/xr/tree/main/examples/editor}
  */
 
 import { RoundedBox, useGLTF } from '@react-three/drei'
@@ -22,16 +53,29 @@ const vectorHelper1 = new Vector3()
 const vectorHelper2 = new Vector3()
 const zAxis = new Vector3(0, 0, 1)
 
+/**
+ * Props for the ResizableWindow component
+ */
 interface ResizableWindowProps {
+  /** React children to render inside the window */
   children?: ReactNode
+  /** Initial position in 3D space [x, y, z]. Defaults to [0, 0, -0.4] */
   position?: [number, number, number]
+  /** Initial scale [x, y, z]. Not commonly used - use baseScale instead */
   scale?: [number, number, number]
+  /** Rotate window to face camera on mount. Defaults to true */
   initiallyRotateTowardsCamera?: boolean
+  /** Continuously rotate window to face camera. Defaults to false */
   autoRotateToCamera?: boolean
+  /** Callback when window position changes */
   onPositionChange?: (position: Vector3) => void
+  /** Callback when window scale changes */
   onScaleChange?: (scale: Vector3) => void
+  /** Aspect ratio (width/height) of the window. Defaults to 16/9 */
   aspectRatio?: number
+  /** Base size of the window in meters. Defaults to 0.3 */
   baseScale?: number
+  /** Color of the drag and resize handles. Defaults to 'grey' */
   handleColor?: string | number
 }
 

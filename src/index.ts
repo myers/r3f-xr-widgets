@@ -1,16 +1,12 @@
-// Widget Components
+// Components
 export { ResizableWindow } from './components/ResizableWindow'
-export { HandleWithAudio, AudioEffects, applyWithAudioEffect } from './components/HandleWithAudio'
-export { Hover } from './components/Hover'
-
-// Utility Components (from r3f-tools)
 export { SplashScreen } from './components/SplashScreen'
-export { GitHubBadge } from './components/GitHubBadge'
 export { EyeLevelGroup, DEFAULT_EYE_LEVEL } from './components/EyeLevelGroup'
+export { AudioEffects, HandleWithAudio } from './components/HandleWithAudio'
+export { Hover } from './components/Hover'
 
 // Hooks
 export { useXRSessionModeSupportedPolling } from './hooks/useXRSessionModeSupportedPolling'
 
 // Utilities
-export { vibrateOnEvent } from './utils/vibrateOnEvent'
-export type { PulseConfig } from './utils/vibrateOnEvent'
+export { vibrateOnEvent, type PulseConfig } from './utils/vibrateOnEvent'
