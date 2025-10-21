@@ -1,0 +1,13 @@
+/* Remove any background from hero image container */
+.VPImage.image-src {
+  background: transparent !important;
+}
+
+.VPHero .image {
+  background: transparent !important;
+}
+
+/* Ensure logo works on both light and dark themes */
+.VPHero .image-container {
+  background: transparent !important;
+}
