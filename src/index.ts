@@ -4,6 +4,7 @@ export { SplashScreen } from './components/SplashScreen'
 export { EyeLevelGroup, DEFAULT_EYE_LEVEL } from './components/EyeLevelGroup'
 export { AudioEffects, HandleWithAudio } from './components/HandleWithAudio'
 export { Hover } from './components/Hover'
+export { GitHubBadge } from './components/GitHubBadge'
 
 // Hooks
 export { useXRSessionModeSupportedPolling } from './hooks/useXRSessionModeSupportedPolling'
