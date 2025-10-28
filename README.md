@@ -1,8 +1,8 @@
 # r3f-xr-widgets
 
-> Reusable XR/VR widgets and utilities for React Three Fiber
-
-A collection of production-ready components and utilities for building WebXR experiences with React Three Fiber. Includes resizable windows, splash screens, eye-level positioning, and more.
+A collection of components and utilities for building WebXR experiences with
+React Three Fiber.  Includes resizable windows, splash screens, eye-level
+positioning, and more.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
