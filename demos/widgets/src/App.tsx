@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber'
-import { Environment } from '@react-three/drei'
+import { Environment, Billboard } from '@react-three/drei'
 import { XR, createXRStore, PointerEvents, noEvents } from '@react-three/xr'
 import { ResizableWindow, AudioEffects, SplashScreen, GitHubBadge } from '../../../src/index'
 import { useState } from 'react'
@@ -12,16 +12,18 @@ const DEFAULT_EYE_LEVEL = 1.5
 
 function WindowDemo() {
   return (
-    <ResizableWindow
-      position={[0, 1.5, -1]}
-      handleColor="#ff9999"
-      autoRotateToCamera={false}
-      initiallyRotateTowardsCamera={true}
-      aspectRatio={16/9}
-      baseScale={0.3}
-    >
-      <DemoContent aspectRatio={16/9} baseScale={0.3} />
-    </ResizableWindow>
+    <Billboard>
+      <ResizableWindow
+        position={[0, 1.5, -1]}
+        handleColor="#ff9999"
+        autoRotateToCamera={false}
+        initiallyRotateTowardsCamera={true}
+        aspectRatio={16/9}
+        baseScale={0.3}
+      >
+        <DemoContent aspectRatio={16/9} baseScale={0.3} />
+      </ResizableWindow>
+    </Billboard>
   )
 }
 
@@ -32,12 +34,6 @@ function Scene() {
       <ambientLight intensity={0.5} />
       <directionalLight position={[5, 5, 5]} intensity={1} castShadow />
       <Environment preset="city" />
-
-      {/* Ground */}
-      <mesh rotation-x={-Math.PI / 2} position-y={-0.5} receiveShadow>
-        <planeGeometry args={[10, 10]} />
-        <meshStandardMaterial color="#333" />
-      </mesh>
 
       {/* Audio Effects */}
       <AudioEffects />
