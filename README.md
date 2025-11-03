@@ -8,6 +8,7 @@ positioning, and more.
 
 ## Features
 
+- **EquirectPlayer** - 360°/180° video player with XR Layer rendering and UIKit controls
 - **ResizableWindow** - Draggable, resizable 3D windows with audio feedback and haptic responses
 - **SplashScreen** - Beautiful XR session entry with VR/AR mode selection
 - **EyeLevelGroup** - Automatic eye-level positioning for comfortable viewing
@@ -32,7 +33,7 @@ yarn add r3f-xr-widgets
 ### Peer Dependencies
 
 ```bash
-npm install react react-dom three @react-three/fiber @react-three/drei @react-three/xr @react-three/handle
+npm install react react-dom three @react-three/fiber @react-three/drei @react-three/xr @react-three/handle @react-three/uikit @react-three/uikit-default @react-three/uikit-lucide @preact/signals-core @react-spring/three
 ```
 
 ## Quick Start
@@ -109,6 +110,84 @@ import { ResizableWindow } from 'r3f-xr-widgets'
 - Positional audio feedback on interaction
 - Haptic feedback on XR controllers
 - Optional camera-facing rotation
+
+### EquirectPlayer
+
+A 360°/180° video player optimized for XR with hardware-accelerated XR Layer rendering. **[Try it live →](https://icepick.info/r3f-xr-widgets/video-player)**
+
+```tsx
+import { EquirectPlayer } from 'r3f-xr-widgets'
+
+<EquirectPlayer
+  title="My 360 Video"
+  videoUrl="https://example.com/video.mp4"
+  videoAngle={180}
+  layout="stereo-left-right"
+/>
+```
+
+**Props:**
+
+- `title` - Video title displayed in controls (optional)
+- `videoUrl` - URL of the equirectangular video (required)
+- `videoAngle` - Field of view in degrees: `360` for full sphere, `180` for front hemisphere (default: `180`)
+- `layout` - Stereo layout: `"stereo-left-right"`, `"stereo-top-bottom"`, or `"mono"` (default: `"stereo-left-right"`)
+
+**Features:**
+
+- Hardware-accelerated XR Layer rendering for smooth playback
+- UIKit-based control panel with play/pause, seek, and volume controls
+- XR controller integration:
+  - **A button** - Play/pause toggle
+  - **B button** - Show/hide control panel
+  - **Right thumbstick left/right** - Seek backward/forward 10 seconds
+- Visual feedback for all controller actions
+- Loading and buffering states with animated indicators
+- Stereo and mono video support
+- Configurable field of view (180° or 360°)
+
+**Subcomponents:**
+
+The video player is built from several smaller components that can be used independently:
+
+- `ControlPanelRoot` - Main control panel with timeline and transport controls
+- `VolumeControl` - Volume slider with mute toggle
+- `VideoSlider` - Seekable timeline with buffered range visualization
+- `ActionIndicator` - Visual feedback for controller inputs
+- `IconFlash` - Animated icon flash effects (play, pause, forward, rewind)
+- `WaitingIcon` - Loading spinner
+
+**Example: Full VR Video Player**
+
+```tsx
+import { Canvas } from '@react-three/fiber'
+import { XR, createXRStore } from '@react-three/xr'
+import { EquirectPlayer, SplashScreen } from 'r3f-xr-widgets'
+
+const store = createXRStore()
+
+function App() {
+  return (
+    <>
+      <SplashScreen store={store}>
+        <h1>VR Video Player</h1>
+        <p>Watch immersive 360° videos</p>
+      </SplashScreen>
+
+      <Canvas>
+        <XR store={store}>
+          <EquirectPlayer
+            title="Sloths in 3D"
+            videoUrl="https://example.com/360-video.mp4"
+            videoAngle={180}
+            layout="stereo-left-right"
+          />
+        </XR>
+      </Canvas>
+    </>
+  )
+}
+```
 
 ### SplashScreen
 
@@ -264,6 +343,9 @@ pnpm typecheck
 # Run widgets demo (HTTPS on port 5273)
 pnpm demo
 
+# Run 360° video player demo (HTTPS on port 5274)
+pnpm demo:video-player
+
 # Run demos landing page (HTTP on port 5173)
 pnpm demo:landing
 
@@ -271,7 +353,7 @@ pnpm demo:landing
 pnpm demo:build
 ```
 
-The widgets demo showcases all library components with interactive examples. It requires HTTPS to enable WebXR features.
+All demos require HTTPS to enable WebXR features. The widgets demo showcases resizable windows and utility components, while the video player demo demonstrates immersive 360° video playback.
 
 ## Project Structure
 
@@ -284,7 +366,14 @@ r3f-xr-widgets/
 │   │   ├── EyeLevelGroup.tsx
 │   │   ├── GitHubBadge.tsx
 │   │   ├── HandleWithAudio.tsx
-│   │   └── Hover.tsx
+│   │   ├── Hover.tsx
+│   │   ├── EquirectPlayer.tsx       # 360° video player
+│   │   ├── ControlPanel.tsx         # Video controls
+│   │   ├── VolumeControl.tsx        # Volume slider
+│   │   ├── VideoSlider.tsx          # Seekable timeline
+│   │   ├── ActionIndicator.tsx      # Controller feedback
+│   │   ├── IconFlash.tsx            # Animated icons
+│   │   └── WaitingIcon.tsx          # Loading spinner
 │   ├── hooks/            # React hooks
 │   │   └── useXRSessionModeSupportedPolling.ts
 │   ├── utils/            # Utility functions
@@ -293,7 +382,8 @@ r3f-xr-widgets/
 │   └── index.ts          # Main exports
 ├── demos/
 │   ├── index.html        # Landing page
-│   └── widgets/          # Interactive demo app
+│   ├── widgets/          # Interactive demo app
+│   └── video-player/     # 360° video player demo
 └── dist/                 # Built library (generated)
 ```
 
@@ -314,7 +404,10 @@ MIT © Myers Carpenter
 ## Acknowledgments
 
 **Core Components Attribution:**
-The `ResizableWindow`, `HandleWithAudio`, and `vibrateOnEvent` utilities were adapted from the [@react-three/xr editor example](https://github.com/pmndrs/xr/tree/main/examples/editor). We're grateful to the pmndrs team for their excellent work on WebXR tooling.
+
+- The `ResizableWindow`, `HandleWithAudio`, and `vibrateOnEvent` utilities were adapted from the [@react-three/xr editor example](https://github.com/pmndrs/xr/tree/main/examples/editor). We're grateful to the pmndrs team for their excellent work on WebXR tooling.
+
+- The `EquirectPlayer` and video player components were migrated and adapted from the [r3f-3d-video-player project](https://github.com/myers/r3f-3d-video-player), upgraded to UIKit 1.0, and enhanced with React Spring animations.
 
 **Built with:**
 

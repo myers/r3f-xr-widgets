@@ -1,7 +1,7 @@
 {
   "name": "r3f-xr-widgets",
   "version": "0.2.4",
-  "description": "Reusable XR/VR widgets and utilities for React Three Fiber - includes resizable windows, splash screens, and XR helper components",
+  "description": "Reusable XR/VR widgets and utilities for React Three Fiber - includes resizable windows, 360° video player, splash screens, and XR helper components",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -20,6 +20,7 @@
     "build": "vite build",
     "demo": "cd demos/widgets && vite --host",
     "demo:widgets": "cd demos/widgets && vite --host",
+    "demo:video-player": "cd demos/video-player && vite --host",
     "demo:landing": "npx vite demos --host --port 5173",
     "demo:build": "cd demos/widgets && vite build",
     "docs:dev": "vitepress dev docs",
@@ -47,7 +48,11 @@
     "splash-screen",
     "resizable",
     "eye-level",
-    "utilities"
+    "utilities",
+    "video-player",
+    "360-video",
+    "equirectangular",
+    "vr-video"
   ],
   "author": "Myers Carpenter <myers@maski.org>",
   "license": "MIT",
@@ -60,9 +65,14 @@
     "url": "https://github.com/myers/r3f-xr-widgets/issues"
   },
   "peerDependencies": {
+    "@preact/signals-core": ">=1.0.0",
+    "@react-spring/three": ">=10.0.0",
     "@react-three/drei": ">=9.0.0",
     "@react-three/fiber": ">=8.0.0",
     "@react-three/handle": ">=6.0.0",
+    "@react-three/uikit": ">=1.0.0",
+    "@react-three/uikit-default": ">=1.0.0",
+    "@react-three/uikit-lucide": ">=1.0.0",
     "@react-three/xr": ">=5.0.0",
     "react": ">=18",
     "three": ">=0.150.0"
