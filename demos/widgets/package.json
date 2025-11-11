@@ -14,7 +14,7 @@
     "@react-three/handle": "^6.6.20",
     "@react-three/uikit": "^0.8.21",
     "@react-three/xr": "^6.6.20",
-    "r3f-xr-widgets": "file:..",
+    "r3f-xr-widgets": "workspace:*",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "three": "^0.172.0"
