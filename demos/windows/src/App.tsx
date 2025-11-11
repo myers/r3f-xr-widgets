@@ -1,87 +1,11 @@
-import { signal } from '@preact/signals-core'
 import { Canvas } from '@react-three/fiber'
 import { Container, Text, setPreferredColorScheme } from '@react-three/uikit'
 import { colors } from '@react-three/uikit-default'
 import { createXRStore, noEvents, PointerEvents, useXR, XR, XROrigin } from '@react-three/xr'
-import { Component, useCallback, useEffect, useMemo, useRef, useState, ReactNode } from 'react'
-import { AudioEffects, HorizonWindow, HorizonWindowTitleBar, cursorTextureUrl, SplashScreen } from 'r3f-xr-widgets'
-import { BackSide, TextureLoader, LinearFilter, MeshBasicMaterial, SRGBColorSpace } from 'three'
-
-// Error Boundary for Canvas
-class CanvasErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
-  constructor(props: { children: ReactNode }) {
-    super(props)
-    this.state = { hasError: false, error: null }
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error }
-  }
-
-  componentDidCatch(error: Error, errorInfo: any) {
-    console.error('[Canvas Error Boundary]', error, errorInfo)
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          padding: '2rem',
-          background: '#fee',
-          border: '2px solid #c00',
-          borderRadius: '0.5rem',
-          maxWidth: '600px',
-          fontFamily: 'monospace'
-        }}>
-          <h2 style={{ margin: '0 0 1rem 0', color: '#c00' }}>Canvas Error</h2>
-          <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontSize: '0.875rem' }}>
-            {this.state.error?.message || 'Unknown error'}
-          </pre>
-          <button
-            onClick={() => this.setState({ hasError: false, error: null })}
-            style={{
-              marginTop: '1rem',
-              padding: '0.5rem 1rem',
-              background: '#c00',
-              color: 'white',
-              border: 'none',
-              borderRadius: '0.25rem',
-              cursor: 'pointer'
-            }}
-          >
-            Retry
-          </button>
-        </div>
-      )
-    }
-
-    return this.props.children
-  }
-}
-
-// Custom cursor material with imported texture
-class CustomCursorMaterial extends MeshBasicMaterial {
-  constructor() {
-    super({
-      transparent: true,
-      toneMapped: false,
-      depthWrite: false,
-      alphaTest: 0.01
-    })
-
-    // Load texture with optimal settings for VR sharpness
-    const loader = new TextureLoader()
-    this.map = loader.load(cursorTextureUrl)
-    this.map.minFilter = LinearFilter      // No mipmaps = sharper!
-    this.map.magFilter = LinearFilter
-    this.map.generateMipmaps = false
-    this.map.colorSpace = SRGBColorSpace
-  }
-}
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { AudioEffects, HorizonWindow, HorizonWindowTitleBar, SplashScreen } from 'r3f-xr-widgets'
+import { BackSide } from 'three'
+import { HorizonCursorMaterial } from './HorizonCursorMaterial'
 
 const store = createXRStore({
   foveation: 0,
@@ -90,7 +14,7 @@ const store = createXRStore({
   controller: {
     rayPointer: {
       cursorModel: {
-        materialClass: CustomCursorMaterial,
+        materialClass: HorizonCursorMaterial,
         size: 0.03,  // 3cm in world space
         renderOrder: 999
       }
@@ -117,44 +41,30 @@ export default function App() {
           <li>UIKit-based flexible content</li>
         </ul>
       </SplashScreen>
-      <CanvasErrorBoundary>
-        <Canvas
-          events={noEvents}
-          gl={{ localClippingEnabled: true }}
-          style={{ width: '100%', flexGrow: 1 }}
-          camera={{ position: [0, 0, 0.65] }}
-        >
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[5, 5, 5]} intensity={1} />
-          <PointerEvents batchEvents={false} />
-          <XR store={store}>
-            <Skybox />
-            <NonVREnvironment />
-            <XROrigin position-y={-1.5} position-z={0.5} />
-            <AudioEffects />
+      <Canvas
+        events={noEvents}
+        gl={{ localClippingEnabled: true }}
+        style={{ width: '100%', flexGrow: 1 }}
+        camera={{ position: [0, 0, 0.65] }}
+      >
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[5, 5, 5]} intensity={1} />
+        <PointerEvents batchEvents={false} />
+        <XR store={store}>
+          <NonVREnvironment />
+          <XROrigin position-y={-1.5} position-z={0.5} />
+          <AudioEffects />
 
-            {/* Single HorizonWindow with interactive content */}
-            <SimpleHorizonWindow />
-          </XR>
-        </Canvas>
-      </CanvasErrorBoundary>
+          {/* Single HorizonWindow with interactive content */}
+          <WindowSystem />
+        </XR>
+      </Canvas>
     </>
   )
 }
 
 // Memoize the selector to prevent infinite loops with React 19
 const selectInVR = (s: any) => s.mode === 'immersive-vr'
-
-function NonVREnvironment() {
-  const inVR = useXR(selectInVR)
-
-  useEffect(() => {
-    console.log('[XR MODE CHANGE]', inVR ? 'ENTERED VR MODE' : 'EXITED VR MODE')
-  }, [inVR])
-
-  // Grey background when not in VR
-  return !inVR ? <color attach="background" args={['#888']} /> : null
-}
 
 function Skybox() {
   return (
@@ -165,10 +75,20 @@ function Skybox() {
   )
 }
 
-function SimpleHorizonWindow() {
-  // Test Signals for width/height
-  const width = useMemo(() => signal(1000), [])
-  const height = useMemo(() => signal(600), [])
+function NonVREnvironment() {
+  const inVR = useXR(selectInVR)
+
+  useEffect(() => {
+    console.log('[XR MODE CHANGE]', inVR ? 'ENTERED VR MODE' : 'EXITED VR MODE')
+  }, [inVR])
+
+  // Only show skybox in VR mode - nothing for AR or desktop
+  return inVR ? <Skybox /> : null
+}
+
+function WindowSystem() {
+  const [width, setWidth] = useState(1000)
+  const [height, setHeight] = useState(600)
   const [visible, setVisible] = useState(true)
   const [windowCount, setWindowCount] = useState(1)
   const timeoutRef = useRef<number | undefined>(undefined)
@@ -224,11 +144,11 @@ function SimpleHorizonWindow() {
             flexDirection="row"
             gap={10}
             onClick={() => {
-              console.log('[BUTTON CLICK] Before:', width.value, height.value)
+              console.log('[BUTTON CLICK] Before:', width, height)
               // Test: Toggle between two sizes
-              width.value = width.value === 1000 ? 1400 : 1000
-              height.value = height.value === 600 ? 900 : 600
-              console.log('[BUTTON CLICK] After:', width.value, height.value)
+              setWidth(width === 1000 ? 1400 : 1000)
+              setHeight(height === 600 ? 900 : 600)
+              console.log('[BUTTON CLICK] After:', width === 1000 ? 1400 : 1000, height === 600 ? 900 : 600)
             }}
             padding={10}
             backgroundColor={0x3b82f6}

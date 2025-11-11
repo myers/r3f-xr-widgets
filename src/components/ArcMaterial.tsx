@@ -67,6 +67,13 @@ void main() {
 }
 `
 
+/**
+ * Shader material for HorizonWindow corner resize handles.
+ *
+ * Renders a 90-degree arc in the corner of a mesh using UV-space coordinates.
+ * Used by HorizonWindow to create interactive corner handles for resizing windows.
+ * The arc appearance can be controlled via opacity for hover and proximity effects.
+ */
 export class ArcMaterial extends ShaderMaterial {
   declare color: Color
 

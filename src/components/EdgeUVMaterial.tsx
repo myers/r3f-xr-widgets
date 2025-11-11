@@ -86,6 +86,13 @@ const defaultUniforms = {
   uForceVisible: { value: false }
 }
 
+/**
+ * Shader material for HorizonWindow edge handles (top, bottom, left, right).
+ *
+ * Renders a horizontal line with rounded caps in UV space for use as edge/border handles.
+ * Used by HorizonWindow to create interactive edge handles for moving and grabbing windows.
+ * Supports proximity-based fading and force-visible override for interaction feedback.
+ */
 export class EdgeUVMaterial extends ShaderMaterial {
   declare color: Color
 
