@@ -11,4 +11,7 @@ export default defineConfig({
   server: {
     port: 5273,
   },
+  build: {
+    sourcemap: true, // Enable source map generation for production build
+  },
 })
