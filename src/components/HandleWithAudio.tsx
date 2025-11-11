@@ -25,8 +25,8 @@ export function AudioEffects() {
 }
 
 export function applyWithAudioEffect(
-  state: HandleState<unknown>, 
-  target: Object3D, 
+  state: HandleState<unknown>,
+  target: Object3D,
   apply: typeof defaultApply | undefined
 ) {
   if (state.first && handleStartAudioEffectRef.current != null) {
@@ -51,10 +51,10 @@ export function applyWithAudioEffect(
 export const HandleWithAudio = forwardRef<HandleStore<unknown>, ComponentPropsWithoutRef<typeof Handle>>(
   (props, ref) => {
     return (
-      <Handle 
-        {...props} 
-        apply={(state, target) => applyWithAudioEffect(state, target, props.apply)} 
-        ref={ref} 
+      <Handle
+        {...props}
+        apply={(state, target) => applyWithAudioEffect(state, target, props.apply)}
+        ref={ref}
       />
     )
   }

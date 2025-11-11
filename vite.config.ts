@@ -13,6 +13,7 @@ export default defineConfig({
   ],
   assetsInclude: ['**/*.glb', '**/*.mp3'],
   build: {
+    sourcemap: true,
     copyPublicDir: false,
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
@@ -30,8 +31,13 @@ export default defineConfig({
         '@react-three/drei',
         '@react-three/xr',
         '@react-three/handle',
+        '@react-three/uikit',
+        '@react-three/uikit-horizon',
+        '@react-three/uikit-lucide',
         '@pmndrs/handle',
         '@pmndrs/pointer-events',
+        '@preact/signals',
+        '@preact/signals-core',
       ],
       output: {
         globals: {

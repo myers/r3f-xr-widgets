@@ -50,18 +50,18 @@ function Scene() {
 
 function DemoContent({ aspectRatio = 16/9, baseScale = 0.3 }: { aspectRatio?: number, baseScale?: number }) {
   const [bgColor, setBgColor] = useState('#1a1a1a')
-  
+
   // Calculate dimensions based on aspect ratio
   const contentWidth = 1000 * baseScale * aspectRatio
   const contentHeight = 1000 * baseScale
-  
+
   return (
     <group>
       <ambientLight intensity={0.5} />
       <directionalLight position={[2, 2, 2]} />
-      
+
       {/* UI Content using uikit */}
-      <Root 
+      <Root
         pixelSize={0.001}
         anchorX="center"
         anchorY="center"
@@ -84,7 +84,7 @@ function DemoContent({ aspectRatio = 16/9, baseScale = 0.3 }: { aspectRatio?: nu
           >
             Hello World
           </Text>
-          
+
           <Container
             backgroundColor="#ff6b6b"
             paddingX={24}

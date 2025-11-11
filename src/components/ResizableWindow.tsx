@@ -100,7 +100,7 @@ export function ResizableWindow({
   const [windowPosition, setWindowPosition] = useState(position)
   const [hasInitiallyRotated, setHasInitiallyRotated] = useState(false)
   const [currentScale, setCurrentScale] = useState(1)
-  
+
   // Update position when prop changes
   useEffect(() => {
     setWindowPosition(position)
@@ -111,7 +111,7 @@ export function ResizableWindow({
     if (rotatingGroupRef.current == null) {
       return
     }
-    
+
     // Handle initial rotation
     if (initiallyRotateTowardsCamera && !hasInitiallyRotated) {
       state.camera.getWorldPosition(vectorHelper1)
@@ -122,12 +122,12 @@ export function ResizableWindow({
       setHasInitiallyRotated(true)
       return
     }
-    
+
     // Handle continuous rotation
     if (!autoRotateToCamera) {
       return
     }
-    
+
     // Only rotate if not being dragged
     const handleState = storeRef.current?.getState()
     if (handleState && handleState.current.pointerAmount > 0) {
@@ -156,7 +156,7 @@ export function ResizableWindow({
               <group>
                 {children}
               </group>
-              
+
               {/* Resize handle (top-right) */}
               <HandleWithAudio
                 targetRef="from-context"
@@ -195,7 +195,7 @@ export function ResizableWindow({
               </HandleWithAudio>
             </HandleTarget>
           </group>
-          
+
           {/* Move handle (bottom) */}
           <group position={[0, (-baseScale / 2 - 0.03) * currentScale, 0]}>
             <HandleWithAudio targetRef="from-context" ref={storeRef} scale={false} multitouch={false} rotate={false}>

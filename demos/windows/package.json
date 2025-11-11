@@ -1,5 +1,5 @@
 {
-  "name": "r3f-xr-widgets-demo",
+  "name": "r3f-xr-widgets-windows-demo",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,10 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@pmndrs/pointer-events": "^6.6.27",
+    "@preact/signals-core": "^1.9.0",
     "@react-three/drei": "^10.5.2",
     "@react-three/fiber": "^9.2.0",
     "@react-three/handle": "^6.6.20",
-    "@react-three/uikit": "^0.8.21",
+    "@react-three/uikit": "~1.0.0",
+    "@react-three/uikit-default": "~1.0.0",
+    "@react-three/uikit-horizon": "~1.0.0",
+    "@react-three/uikit-lucide": "~1.0.0",
     "@react-three/xr": "^6.6.20",
     "r3f-xr-widgets": "workspace:*",
     "react": "^19.1.0",
