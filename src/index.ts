@@ -1,6 +1,7 @@
 // Components
 export { ResizableWindow } from './components/ResizableWindow'
 export { HorizonWindow } from './components/HorizonWindow'
+export { HorizonWindowTitleBar, type HorizonWindowTitleBarProps } from './components/HorizonWindowTitleBar'
 export { SplashScreen } from './components/SplashScreen'
 export { EyeLevelGroup, DEFAULT_EYE_LEVEL } from './components/EyeLevelGroup'
 export { AudioEffects, HandleWithAudio } from './components/HandleWithAudio'

@@ -2,9 +2,8 @@ import { Signal, signal } from '@preact/signals-core'
 import { HandleState } from '@react-three/handle'
 import { PointerEvent } from '@pmndrs/pointer-events'
 import { useFrame } from '@react-three/fiber'
-import { Container, Content, Text } from '@react-three/uikit'
+import { Container, Content } from '@react-three/uikit'
 import { Panel } from '@react-three/uikit-horizon'
-import { XIcon } from '@react-three/uikit-lucide'
 import { isXRInputSourceState } from '@react-three/xr'
 import { ReactNode, RefObject, useRef, useMemo, useState, useEffect } from 'react'
 import { Vector3, Object3D, Group } from 'three'
@@ -256,8 +255,7 @@ export function HorizonWindow({
   pixelSize = 0.0015,
   useProximity: _useProximity = false,
   onResize,
-  title,
-  onClose,
+  titleBar,
 }: {
   children?: ReactNode
   width: number | Signal<number>
@@ -269,8 +267,7 @@ export function HorizonWindow({
   pixelSize?: number
   useProximity?: boolean
   onResize?: (width: number, height: number) => void
-  title?: string
-  onClose?: () => void
+  titleBar: ReactNode
 }) {
   // Convert width/height props to signals if needed
   const width = useMemo(
@@ -477,32 +474,7 @@ export function HorizonWindow({
             }}
           >
             <Panel padding={12} width="100%">
-              <Container flexDirection="row" alignItems="center" gap={16} flexGrow={1}>
-                {title && (
-                  <Text fontSize={24} color="white">
-                    {title}
-                  </Text>
-                )}
-                <Container flexGrow={1} />
-                {onClose && (
-                  <Container
-                    width={40}
-                    height={40}
-                    onClick={(e) => {
-                      e.stopPropagation?.()
-                      onClose()
-                    }}
-                    onPointerDown={(e) => {
-                      e.stopPropagation?.()
-                    }}
-                    cursor="pointer"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <XIcon width={24} height={24} color="white" />
-                  </Container>
-                )}
-              </Container>
+              {titleBar}
             </Panel>
           </HandleWithAudio>
         </Container>

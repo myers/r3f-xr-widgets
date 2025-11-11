@@ -4,7 +4,7 @@ import { Container, Text, setPreferredColorScheme } from '@react-three/uikit'
 import { colors } from '@react-three/uikit-default'
 import { createXRStore, noEvents, PointerEvents, useXR, XR, XROrigin } from '@react-three/xr'
 import { Component, useCallback, useEffect, useMemo, useRef, useState, ReactNode } from 'react'
-import { AudioEffects, HorizonWindow, cursorTextureUrl, SplashScreen } from 'r3f-xr-widgets'
+import { AudioEffects, HorizonWindow, HorizonWindowTitleBar, cursorTextureUrl, SplashScreen } from 'r3f-xr-widgets'
 import { BackSide, TextureLoader, LinearFilter, MeshBasicMaterial, SRGBColorSpace } from 'three'
 
 // Error Boundary for Canvas
@@ -197,8 +197,7 @@ function SimpleHorizonWindow() {
   return (
     <group position-y={-0.3} position-z={-1}>
       <HorizonWindow
-        title="Hello World"
-        onClose={handleClose}
+        titleBar={<HorizonWindowTitleBar title="Hello World" onClose={handleClose} />}
         width={width}
         height={height}
         minWidth={300}
