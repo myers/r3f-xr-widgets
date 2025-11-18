@@ -315,4 +315,3 @@ The ResizableWindow component was adapted from the [@react-three/xr editor examp
 
 - [AudioEffects](/components/audio-effects) - Required for audio feedback
 - [Hover](/components/hover) - Used internally for handle hover states
-- [vibrateOnEvent](/api/utilities#vibrateoneven) - Used internally for haptic feedback

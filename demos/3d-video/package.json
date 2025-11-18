@@ -1,0 +1,32 @@
+{
+  "name": "3d-video-demo",
+  "description": "Stereoscopic 3D 360° video player supporting side-by-side and top-bottom formats for immersive VR video experiences",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:prod": "vite --mode production",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@preact/signals-core": "^1.12.1",
+    "@react-spring/three": "^10.0.3",
+    "@react-three/drei": "^10.7.6",
+    "@react-three/fiber": "^9.3.0",
+    "@react-three/uikit": "^1.0.56",
+    "@react-three/uikit-default": "^1.0.56",
+    "@react-three/uikit-horizon": "~1.0.58",
+    "@react-three/uikit-lucide": "^1.0.58",
+    "@react-three/xr": "^6.6.27",
+    "r3f-xr-widgets": "file:../..",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "three": "^0.165.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.4",
+    "vite": "^7.1.9"
+  }
+}

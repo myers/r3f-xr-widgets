@@ -38,3 +38,14 @@ demo/dist/
 # Temporary files
 *.tmp
 *.temp
+/.claude
+tmp/
+
+*storybook.log
+storybook-static
+docs/.vitepress/cache
+/_pages
+/_pages_serve
+
+# Auto-generated API docs
+docs/api/

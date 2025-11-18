@@ -11,8 +11,8 @@ This is a library package (`r3f-xr-widgets`) that provides reusable XR/VR widget
 - `pnpm dev` - Build library in watch mode for development
 - `pnpm build` - Build the library for production (outputs to `dist/`)
 - `pnpm typecheck` - Run TypeScript type checking without emitting files
-- `pnpm demo` - Start the widgets demo dev server with HTTPS (required for XR)
-- `pnpm demo:widgets` - Start the widgets demo (same as `pnpm demo`)
+- `pnpm demo` - Start the resizable window demo dev server with HTTPS (required for XR)
+- `pnpm demo:resizable-window` - Start the resizable window demo (same as `pnpm demo`)
 - `pnpm demo:landing` - Serve the demos landing page
 - `pnpm demo:build` - Build demos for production
 
@@ -69,14 +69,14 @@ The demos (`demos/` directory) showcase the library components:
 - Links to individual demo applications
 - Run with `pnpm demo:landing`
 
-**Widgets Demo** (`demos/widgets/`):
+**Resizable Window Demo** (`demos/resizable-window/`):
 - Showcases ResizableWindow component
 - XR store setup with `createXRStore` from `@react-three/xr`
 - SplashScreen for VR/AR entry
 - HTTPS dev server (required for WebXR)
 - UIKit integration for 2D content inside windows
 - Camera positioned at eye level (1.5m)
-- Run with `pnpm demo` or `pnpm demo:widgets`
+- Run with `pnpm demo` or `pnpm demo:resizable-window`
 
 ## Build System
 
@@ -91,3 +91,14 @@ The demos (`demos/` directory) showcase the library components:
 - Target ES2020 with DOM types
 - Output to `dist/` with declaration maps
 - Source in `src/`, excludes `demo/`
+- to get a change to the library to work, you need to cd ~/c/standalone/r3f-xr-widgets; pnpm build; cd demo; rm -r node_modules ; pnpm install ; pnpm dev
+- after you finish at set of edits, before you check to see if something is working: run a typecheck
+- Pretend /tmp does not exist.  ~/c/standalone should be your working area.  Always use jpeg screenshots.
+- This project uses threejs to render things, snapshots and click in the chrome mcp are probably useless in most cases
+- before you finish be sure to test your changes with chrome mcp using screenshots to validate
+- If you need to read about uikit look at ~/c/uikit-workspaces/uikit
+- If you need to read about react-xr look at ~/c/uikit-workspaces/xr
+- when changing code, see if there is a .test.tsx for that component.  Use that test to see if the change causes a regression before testing in the browser with chrome devtools mcp
+- NEVER EVER EVER set a `<color attach="background" ... />` when using an XRLayer.  The layer will not be visible.
+- when you are looking test failures remember you can use pnpm test <filename>
+- no one is using this library yet, we don't need to worry about breaking changes

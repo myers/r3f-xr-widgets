@@ -11,7 +11,10 @@ export default defineConfig({
       include: ['src/**/*'],
     }),
   ],
-  assetsInclude: ['**/*.glb', '**/*.mp3'],
+  json: {
+    stringify: true,
+  },
+  assetsInclude: ['**/*.glb', '**/*.mp3', '**/*.json'],
   build: {
     sourcemap: true,
     copyPublicDir: false,
@@ -32,8 +35,10 @@ export default defineConfig({
         '@react-three/xr',
         '@react-three/handle',
         '@react-three/uikit',
+        '@react-three/uikit-default',
         '@react-three/uikit-horizon',
         '@react-three/uikit-lucide',
+        '@react-spring/three',
         '@pmndrs/handle',
         '@pmndrs/pointer-events',
         '@preact/signals',

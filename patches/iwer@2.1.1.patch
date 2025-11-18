@@ -1,0 +1,69 @@
+diff --git a/lib/device/XRDevice.js b/lib/device/XRDevice.js
+index 51d8dfdc665e7dd39be519c4781515aa87ff69ba..c3af63af51e73392a1171c289dc6555473f714d1 100644
+--- a/lib/device/XRDevice.js
++++ b/lib/device/XRDevice.js
+@@ -249,7 +249,7 @@ export class XRDevice {
+         Object.defineProperty(navigator, 'userAgent', {
+             value: this[P_DEVICE].userAgent,
+             writable: false,
+-            configurable: false,
++            configurable: true,
+             enumerable: true,
+         });
+         globalObject['XRSystem'] = XRSystem;
+diff --git a/lib/session/XRSession.js b/lib/session/XRSession.js
+index cdf3f1f125f5da4234a6477ffa4969b414f53802..d6f15f6429ba34f506fe11b929221d8dd77b9306 100644
+--- a/lib/session/XRSession.js
++++ b/lib/session/XRSession.js
+@@ -39,6 +39,7 @@ export class XRSession extends EventTarget {
+             enabledFeatures: enabledFeatures,
+             isSystemKeyboardSupported: false,
+             ended: false,
++            contextLostHandler: null,
+             projectionMatrices: {
+                 [XREye.Left]: mat4.create(),
+                 [XREye.Right]: mat4.create(),
+@@ -73,6 +74,27 @@ export class XRSession extends EventTarget {
+                     this[P_SESSION].renderState = this[P_SESSION].pendingRenderState;
+                     this[P_SESSION].pendingRenderState = null;
+                     this[P_SESSION].device[P_DEVICE].onBaseLayerSet(this[P_SESSION].renderState.baseLayer);
++
++                    // Set up context lost handler when baseLayer is set
++                    const newBaseLayer = this[P_SESSION].renderState.baseLayer;
++                    if (newBaseLayer && newBaseLayer.context && newBaseLayer.context.canvas) {
++                        // Remove old handler if it exists
++                        if (this[P_SESSION].contextLostHandler) {
++                            this[P_SESSION].contextLostHandler.canvas.removeEventListener('webglcontextlost', this[P_SESSION].contextLostHandler.handler);
++                        }
++
++                        // Create new handler
++                        const handler = (event) => {
++                            event.preventDefault(); // Prevent default recovery
++                            this[P_SESSION].ended = true;
++                            if (this[P_SESSION].deviceFrameHandle) {
++                                globalThis.cancelAnimationFrame(this[P_SESSION].deviceFrameHandle);
++                            }
++                        };
++
++                        newBaseLayer.context.canvas.addEventListener('webglcontextlost', handler);
++                        this[P_SESSION].contextLostHandler = { canvas: newBaseLayer.context.canvas, handler };
++                    }
+                 }
+                 const baseLayer = this[P_SESSION].renderState.baseLayer;
+                 if (baseLayer === null) {
+@@ -465,7 +487,15 @@ export class XRSession extends EventTarget {
+                 reject(new DOMException('XRSession has already ended.', 'InvalidStateError'));
+             }
+             else {
++                this[P_SESSION].ended = true; // FIX: Set ended flag to stop frame loop
+                 globalThis.cancelAnimationFrame(this[P_SESSION].deviceFrameHandle);
++
++                // Clean up context lost handler
++                if (this[P_SESSION].contextLostHandler) {
++                    this[P_SESSION].contextLostHandler.canvas.removeEventListener('webglcontextlost', this[P_SESSION].contextLostHandler.handler);
++                    this[P_SESSION].contextLostHandler = null;
++                }
++
+                 this[P_SESSION].device[P_DEVICE].onSessionEnd();
+                 this.dispatchEvent(new XRSessionEvent('end', { session: this }));
+                 resolve();

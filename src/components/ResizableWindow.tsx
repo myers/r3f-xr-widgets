@@ -1,3 +1,52 @@
+import { RoundedBox, useGLTF } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import { ReactNode, useRef, useState, useEffect } from 'react'
+import { Euler, Group, Mesh, Quaternion, Vector3 } from 'three'
+import { damp } from 'three/src/math/MathUtils.js'
+import { HandleTarget, HandleStore, defaultApply } from '@react-three/handle'
+import { HandleWithAudio } from './HandleWithAudio'
+import { Hover } from './Hover'
+import rotateModelUrl from '../assets/models/rotate.glb?url'
+
+// Helper objects for rotation calculations
+const eulerHelper = new Euler()
+const quaternionHelper = new Quaternion()
+const vectorHelper1 = new Vector3()
+const vectorHelper2 = new Vector3()
+const zAxis = new Vector3(0, 0, 1)
+
+/**
+ * Props for the ResizableWindow component
+ * @group Types
+ */
+export interface ResizableWindowProps {
+  /** React children to render inside the window */
+  children?: ReactNode
+  /** Initial position in 3D space [x, y, z]. Defaults to [0, 0, -0.4] */
+  position?: [number, number, number]
+  /** Initial scale [x, y, z]. Not commonly used - use baseScale instead */
+  scale?: [number, number, number]
+  /** Rotate window to face camera on mount. Defaults to true */
+  initiallyRotateTowardsCamera?: boolean
+  /** Continuously rotate window to face camera. Defaults to false */
+  autoRotateToCamera?: boolean
+  /** Callback when window position changes */
+  onPositionChange?: (position: Vector3) => void
+  /** Callback when window scale changes */
+  onScaleChange?: (scale: Vector3) => void
+  /** Aspect ratio (width/height) of the window. Defaults to 16/9 */
+  aspectRatio?: number
+  /** Base size of the window in meters. Defaults to 0.3 */
+  baseScale?: number
+  /** Color of the drag and resize handles. Defaults to 'grey' */
+  handleColor?: string | number
+}
+
+function RotateGeometry() {
+  const { scene } = useGLTF(rotateModelUrl)
+  return <primitive attach="geometry" object={(scene.children[2] as Mesh).geometry} />
+}
+
 /**
  * An interactive 3D window component with drag-to-move and resize handles.
  *
@@ -7,6 +56,8 @@
  * - Positional audio feedback on interaction
  * - Haptic feedback on XR controllers
  * - Optional camera-facing rotation (initial or continuous)
+ *
+ * @group Components
  *
  * @example
  * ```tsx
@@ -35,65 +86,17 @@
  * Adapted from @react-three/xr editor example
  * @see {@link https://github.com/pmndrs/xr/tree/main/examples/editor}
  */
-
-import { RoundedBox, useGLTF } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
-import { ReactNode, useRef, useState, useEffect } from 'react'
-import { Euler, Group, Mesh, Quaternion, Vector3 } from 'three'
-import { damp } from 'three/src/math/MathUtils.js'
-import { HandleTarget, HandleStore, defaultApply } from '@react-three/handle'
-import { HandleWithAudio } from './HandleWithAudio'
-import { Hover } from './Hover'
-import rotateModelUrl from '../assets/models/rotate.glb?url'
-
-// Helper objects for rotation calculations
-const eulerHelper = new Euler()
-const quaternionHelper = new Quaternion()
-const vectorHelper1 = new Vector3()
-const vectorHelper2 = new Vector3()
-const zAxis = new Vector3(0, 0, 1)
-
-/**
- * Props for the ResizableWindow component
- */
-interface ResizableWindowProps {
-  /** React children to render inside the window */
-  children?: ReactNode
-  /** Initial position in 3D space [x, y, z]. Defaults to [0, 0, -0.4] */
-  position?: [number, number, number]
-  /** Initial scale [x, y, z]. Not commonly used - use baseScale instead */
-  scale?: [number, number, number]
-  /** Rotate window to face camera on mount. Defaults to true */
-  initiallyRotateTowardsCamera?: boolean
-  /** Continuously rotate window to face camera. Defaults to false */
-  autoRotateToCamera?: boolean
-  /** Callback when window position changes */
-  onPositionChange?: (position: Vector3) => void
-  /** Callback when window scale changes */
-  onScaleChange?: (scale: Vector3) => void
-  /** Aspect ratio (width/height) of the window. Defaults to 16/9 */
-  aspectRatio?: number
-  /** Base size of the window in meters. Defaults to 0.3 */
-  baseScale?: number
-  /** Color of the drag and resize handles. Defaults to 'grey' */
-  handleColor?: string | number
-}
-
-function RotateGeometry() {
-  const { scene } = useGLTF(rotateModelUrl)
-  return <primitive attach="geometry" object={(scene.children[2] as Mesh).geometry} />
-}
-
-export function ResizableWindow({
-  children,
-  position = [0, 0, -0.4],
-  initiallyRotateTowardsCamera = true,
-  autoRotateToCamera = false,
-  onScaleChange,
-  aspectRatio = 16 / 9,
-  baseScale = 0.3,
-  handleColor = 'grey'
-}: ResizableWindowProps) {
+export function ResizableWindow(props: ResizableWindowProps) {
+  const {
+    children,
+    position = [0, 0, -0.4],
+    initiallyRotateTowardsCamera = true,
+    autoRotateToCamera = false,
+    onScaleChange,
+    aspectRatio = 16 / 9,
+    baseScale = 0.3,
+    handleColor = 'grey'
+  } = props
   const groupRef = useRef<Group>(null)
   const rotatingGroupRef = useRef<Group>(null)
   const storeRef = useRef<HandleStore<unknown>>(null)

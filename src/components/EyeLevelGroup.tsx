@@ -7,6 +7,8 @@ import { useFrame } from '@react-three/fiber'
  * Default eye level height in meters (1.5m).
  * Used for positioning UI elements at a comfortable viewing height.
  *
+ * @group Assets
+ *
  * @example
  * ```tsx
  * import { DEFAULT_EYE_LEVEL } from 'r3f-xr-widgets'
@@ -18,8 +20,9 @@ export const DEFAULT_EYE_LEVEL = 1.5
 
 /**
  * Props for the EyeLevelGroup component
+ * @group Types
  */
-interface EyeLevelGroupProps {
+export interface EyeLevelGroupProps {
   /** React children to position at eye level */
   children: ReactNode
   /** Fallback eye level height in meters when not in XR session */
@@ -37,6 +40,8 @@ interface EyeLevelGroupProps {
  * at a comfortable viewing height for each individual user, accounting for
  * differences in height and play space setup.
  *
+ * @group Components
+ *
  * @example
  * ```tsx
  * import { EyeLevelGroup, DEFAULT_EYE_LEVEL } from 'r3f-xr-widgets'
@@ -49,7 +54,8 @@ interface EyeLevelGroupProps {
  * </EyeLevelGroup>
  * ```
  */
-export function EyeLevelGroup({ children, defaultEyeLevel }: EyeLevelGroupProps) {
+export function EyeLevelGroup(props: EyeLevelGroupProps) {
+  const { children, defaultEyeLevel } = props
   const session = useXR((state) => state.session)
   const { camera } = useThree()
   const [eyeLevel, setEyeLevel] = useState(defaultEyeLevel)

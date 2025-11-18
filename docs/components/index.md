@@ -22,6 +22,7 @@ An interactive 3D window with drag-to-move and resize handles. Perfect for float
 ```
 
 **Use Cases:**
+
 - Floating control panels
 - Content viewers (images, videos, 3D models)
 - Interactive dashboards
@@ -45,6 +46,7 @@ Full-screen overlay for entering XR sessions with automatic VR/AR detection and 
 ```
 
 **Use Cases:**
+
 - XR session entry
 - Loading screens
 - Mode selection (VR vs AR)
@@ -118,19 +120,24 @@ Simple GitHub repository badge/link component for demos.
 ## Component Categories
 
 ### Interactive Widgets
+
 - **ResizableWindow** - Movable, resizable 3D windows
 
 ### Session Management
+
 - **SplashScreen** - XR entry and mode selection
 
 ### Positioning Helpers
+
 - **EyeLevelGroup** - Automatic eye-level positioning
 
 ### Audio & Haptics
+
 - **AudioEffects** - Shared audio sources
 - **Hover** - Haptic feedback wrapper
 
 ### Utilities
+
 - **GitHubBadge** - Repository links
 
 ## Quick Comparison
@@ -150,5 +157,4 @@ Simple GitHub repository badge/link component for demos.
 
 - Explore individual component pages for detailed documentation
 - Check out [Examples](/guide/examples/basic-window) for common patterns
-- Try the [Live Demos](https://icepick.info/r3f-xr-widgets/widgets/) to see components in action
-- Read the [API Reference](/api/) for comprehensive prop documentation
+- Try the [Live Demos](/demos) to see components in action

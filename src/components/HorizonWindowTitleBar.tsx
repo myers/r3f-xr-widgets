@@ -1,16 +1,26 @@
 import { Container, Text } from '@react-three/uikit'
 import { XIcon } from '@react-three/uikit-lucide'
+import montserratFontData from '../assets/fonts/Montserrat-font'
 
+/**
+ * Props for the HorizonWindowTitleBar component
+ * @group Types
+ */
 export interface HorizonWindowTitleBarProps {
   title?: string
   onClose?: () => void
 }
 
-export function HorizonWindowTitleBar({ title, onClose }: HorizonWindowTitleBarProps) {
+/**
+ * Title bar component for HorizonWindow with optional title and close button
+ * @group Components
+ */
+export function HorizonWindowTitleBar(props: HorizonWindowTitleBarProps) {
+  const { title, onClose } = props
   return (
     <Container flexDirection="row" alignItems="center" gap={16} flexGrow={1}>
       {title && (
-        <Text fontSize={24} color="white">
+        <Text fontSize={24} color="white" fontFamily="montserrat" fontFamilies={{ montserrat: { normal: montserratFontData } }}>
           {title}
         </Text>
       )}

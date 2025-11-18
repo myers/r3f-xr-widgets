@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+import createDebug from 'debug'
+
+const debug = createDebug('r3f-xr-widgets:hooks:xr-session')
 
 /**
  * Temporary polling-based hook to check if a specific XRSessionMode is supported.
@@ -6,6 +9,8 @@ import { useEffect, useRef, useState } from 'react'
  * This polls navigator.xr.isSessionSupported() every 100ms until support is detected.
  * Once the React XR PR with devicechange support is merged, this can be replaced
  * with the event-driven implementation from @react-three/xr.
+ *
+ * @group Hooks
  *
  * @param mode - The XRSessionMode to check ('immersive-vr' | 'immersive-ar' | 'inline')
  * @returns boolean | undefined - true if supported, false if not, undefined if still checking
@@ -28,17 +33,24 @@ export function useXRSessionModeSupportedPolling(mode: XRSessionMode): boolean |
 
     // Check immediately
     const checkSupport = () => {
+      debug(`useXRSessionModeSupportedPolling [${mode}]: Checking support...`)
+
       if (typeof navigator === 'undefined' || !navigator.xr) {
+        debug(`useXRSessionModeSupportedPolling [${mode}]: No navigator.xr, setting false`)
         setSupported(false)
         return false
       }
 
+      debug(`useXRSessionModeSupportedPolling [${mode}]: navigator.xr found:`, navigator.xr.constructor?.name)
+
       navigator.xr
         .isSessionSupported(mode)
         .then((isSupported) => {
+          debug(`useXRSessionModeSupportedPolling [${mode}]: isSessionSupported returned:`, isSupported)
           setSupported(isSupported)
         })
-        .catch(() => {
+        .catch((err) => {
+          debug(`useXRSessionModeSupportedPolling [${mode}]: isSessionSupported error:`, err)
           setSupported(false)
         })
 

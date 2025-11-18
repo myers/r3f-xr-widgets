@@ -1,0 +1,25 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/index.ts"],
+  "out": "docs/api",
+  "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme"],
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.stories.tsx",
+    "**/test-utils/**",
+    "**/__screenshots__/**"
+  ],
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "excludeProtected": true,
+  "readme": "none",
+  "gitRevision": "main",
+  "hideGenerator": true,
+  "sort": ["alphabetical"],
+  "groupOrder": ["Components", "Hooks", "Utilities", "Materials", "Assets", "Types", "*"],
+  "navigation": {
+    "includeGroups": true,
+    "includeCategories": false
+  }
+}

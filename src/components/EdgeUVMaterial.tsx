@@ -1,4 +1,7 @@
 import { ShaderMaterial, Vector3, Color, UniformsUtils } from 'three'
+import createDebug from 'debug'
+
+const debug = createDebug('r3f-xr-widgets:materials:edge-uv')
 
 // UV-space edge shader - vertex shader
 export const edgeUVVertexShader = /* glsl */ `
@@ -92,6 +95,8 @@ const defaultUniforms = {
  * Renders a horizontal line with rounded caps in UV space for use as edge/border handles.
  * Used by HorizonWindow to create interactive edge handles for moving and grabbing windows.
  * Supports proximity-based fading and force-visible override for interaction feedback.
+ *
+ * @group Materials
  */
 export class EdgeUVMaterial extends ShaderMaterial {
   declare color: Color
@@ -120,7 +125,7 @@ export class EdgeUVMaterial extends ShaderMaterial {
       uniforms
     })
 
-    console.log('[EdgeUVMaterial] Constructor called with:', {
+    debug('[EdgeUVMaterial] Constructor called with:', {
       lineThicknessFraction,
       lineColor,
       opacity

@@ -11,6 +11,9 @@ import { clamp } from 'three/src/math/MathUtils.js'
 import { ArcMaterial } from './ArcMaterial'
 import { EdgeUVMaterial } from './EdgeUVMaterial'
 import { HandleWithAudio } from './HandleWithAudio'
+import createDebug from 'debug'
+
+const debug = createDebug('r3f-xr-widgets:components:horizon-window')
 
 // Helper to vibrate controller on hover/interaction
 function vibrateOnEvent(e: PointerEvent | any) {
@@ -80,7 +83,7 @@ function ArcCornerHandle({
         width={40}
         height={40}
         onPointerEnter={(e) => {
-          console.log(`[${label} ARC] Pointer enter`)
+          debug(`[${label} ARC] Pointer enter`)
           // Only apply hover effect if borderVisible is not overriding
           if (!borderVisible) {
             arcMaterial.setOpacity(1.0)
@@ -91,12 +94,12 @@ function ArcCornerHandle({
             clearTimeout(hapticTimeoutRef.current)
           }
           hapticTimeoutRef.current = window.setTimeout(() => {
-            console.log(`[${label} ARC] Haptic feedback triggered after 500ms`)
+            debug(`[${label} ARC] Haptic feedback triggered after 500ms`)
             vibrateOnEvent(e)
           }, 500)
         }}
         onPointerLeave={(_e) => {
-          console.log(`[${label} ARC] Pointer leave`)
+          debug(`[${label} ARC] Pointer leave`)
           // Only apply hover effect if borderVisible is not overriding
           if (!borderVisible) {
             arcMaterial.setOpacity(0.0)
@@ -109,10 +112,10 @@ function ArcCornerHandle({
           }
         }}
         onPointerDown={(_e) => {
-          console.log(`[${label} ARC] Pointer down`)
+          debug(`[${label} ARC] Pointer down`)
         }}
         onPointerUp={(_e) => {
-          console.log(`[${label} ARC] Pointer up`)
+          debug(`[${label} ARC] Pointer up`)
         }}
       >
         <Content>
@@ -181,7 +184,7 @@ function EdgeHandle({
       rotate={false}
       multitouch={false}
       apply={(state) => {
-        console.log('[EDGE HANDLE APPLY]', {
+        debug('[EDGE HANDLE APPLY]', {
           first: state.first,
           last: state.last,
           position: state.current.position,
@@ -201,14 +204,14 @@ function EdgeHandle({
         width={orientation === 'vertical' ? 40 : undefined}
         height={orientation === 'horizontal' ? 40 : undefined}
         onPointerEnter={(e) => {
-          console.log('[EDGE HANDLE CONTAINER] Pointer enter')
+          debug('[EDGE HANDLE CONTAINER] Pointer enter')
 
           // Start delayed haptic feedback
           if (hapticTimeoutRef.current !== null) {
             clearTimeout(hapticTimeoutRef.current)
           }
           hapticTimeoutRef.current = window.setTimeout(() => {
-            console.log('[EDGE HANDLE CONTAINER] Haptic feedback triggered after 500ms')
+            debug('[EDGE HANDLE CONTAINER] Haptic feedback triggered after 500ms')
             vibrateOnEvent(e)
           }, 500)
         }}
@@ -219,7 +222,7 @@ function EdgeHandle({
           }
         }}
         onPointerLeave={() => {
-          console.log('[EDGE HANDLE CONTAINER] Pointer leave')
+          debug('[EDGE HANDLE CONTAINER] Pointer leave')
           pointerLocalPosRef.current.set(9999, 9999, 9999)
 
           // Clear haptic timeout if pointer leaves before delay
@@ -243,32 +246,111 @@ function EdgeHandle({
   )
 }
 
-// UIKit-based HorizonWindow component
-export function HorizonWindow({
-  children,
-  width: widthProp,
-  height: heightProp,
-  minWidth = 300,
-  maxWidth = 1000,
-  minHeight = 250,
-  maxHeight = 700,
-  pixelSize = 0.0015,
-  useProximity: _useProximity = false,
-  onResize,
-  titleBar,
-}: {
+/**
+ * Props for the HorizonWindow component
+ * @group Types
+ */
+export interface HorizonWindowProps {
+  /** React children to render inside the window content area */
   children?: ReactNode
+  /** Window width in pixels (can be a number or @preact/signals Signal for reactive sizing) */
   width: number | Signal<number>
+  /** Window height in pixels (can be a number or @preact/signals Signal for reactive sizing) */
   height: number | Signal<number>
+  /** Minimum allowed width in pixels @default 300 */
   minWidth?: number
+  /** Maximum allowed width in pixels @default 1000 */
   maxWidth?: number
+  /** Minimum allowed height in pixels @default 250 */
   minHeight?: number
+  /** Maximum allowed height in pixels @default 700 */
   maxHeight?: number
+  /** Size of each pixel in meters (controls overall window scale) @default 0.0015 */
   pixelSize?: number
+  /** Enable proximity-based edge fading @default false */
   useProximity?: boolean
+  /** Callback fired when window is resized with new dimensions */
   onResize?: (width: number, height: number) => void
+  /** Title bar content (typically a HorizonWindowTitleBar component) */
   titleBar: ReactNode
-}) {
+}
+
+/**
+ * Advanced resizable and movable window component using UIKit and Horizon Panel
+ *
+ * A feature-rich 3D window with:
+ * - Four corner resize handles with arc-shaped visual indicators
+ * - Four edge handles for repositioning the window
+ * - Title bar for dragging/moving
+ * - Border visibility during interactions
+ * - Proximity-based edge fade effects (optional)
+ * - Haptic feedback on XR controllers
+ * - Positional audio feedback via HandleWithAudio
+ *
+ * Unlike ResizableWindow which uses basic Three.js meshes, HorizonWindow integrates with
+ * @react-three/uikit and @react-three/uikit-horizon for advanced 2D UI rendering in 3D space.
+ *
+ * @group Components
+ *
+ * @example Basic usage
+ * ```tsx
+ * import { HorizonWindow, HorizonWindowTitleBar, AudioEffects } from 'r3f-xr-widgets'
+ * import { signal } from '@preact/signals-core'
+ * import { Container, Text } from '@react-three/uikit'
+ *
+ * const width = signal(800)
+ * const height = signal(600)
+ *
+ * function Scene() {
+ *   return (
+ *     <>
+ *       <AudioEffects />
+ *       <HorizonWindow
+ *         width={width}
+ *         height={height}
+ *         minWidth={400}
+ *         maxWidth={1200}
+ *         titleBar={<HorizonWindowTitleBar>My Window</HorizonWindowTitleBar>}
+ *         onResize={(w, h) => console.log('Resized to', w, h)}
+ *       >
+ *         <Container padding={20}>
+ *           <Text>Window content here</Text>
+ *         </Container>
+ *       </HorizonWindow>
+ *     </>
+ *   )
+ * }
+ * ```
+ *
+ * @example Static sizing (without signals)
+ * ```tsx
+ * <HorizonWindow
+ *   width={800}
+ *   height={600}
+ *   titleBar={<HorizonWindowTitleBar>Static Window</HorizonWindowTitleBar>}
+ * >
+ *   {/* content *\/}
+ * </HorizonWindow>
+ * ```
+ *
+ * @see {@link HorizonWindowTitleBar} for title bar component
+ * @see {@link AudioEffects} for required audio feedback setup
+ */
+export function HorizonWindow(props: HorizonWindowProps) {
+  const {
+    children,
+    width: widthProp,
+    height: heightProp,
+    minWidth = 300,
+    maxWidth = 1000,
+    minHeight = 250,
+    maxHeight = 700,
+    pixelSize = 0.0015,
+    useProximity: _useProximity = false,
+    onResize,
+    titleBar,
+  } = props
+
   // Convert width/height props to signals if needed
   const width = useMemo(
     () => typeof widthProp === 'number' ? signal(widthProp) : widthProp,
@@ -320,7 +402,7 @@ export function HorizonWindow({
 
   // Shared resize callback for all corner handles
   const handleResize = (state: HandleState<unknown>) => {
-    console.log('[HANDLE RESIZE]', { first: state.first, last: state.last, height, width, heightValue: height?.value, widthValue: width?.value })
+    debug('[HANDLE RESIZE]', { first: state.first, last: state.last, height, width, heightValue: height?.value, widthValue: width?.value })
     if (state.first) {
       initialHeight.current = height.value
       initialWidth.current = width.value

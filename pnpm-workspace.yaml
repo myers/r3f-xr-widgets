@@ -1,2 +1,8 @@
 packages:
-  - 'demos/*'
+  - demos/*
+
+patchedDependencies:
+  iwer@2.1.1: patches/iwer@2.1.1.patch
+  '@pmndrs/xr@6.6.27': patches/@pmndrs__xr@6.6.27.patch
+  '@pmndrs/uikit@1.0.59': patches/@pmndrs__uikit@1.0.59.patch
+  '@react-three/uikit@1.0.59': patches/@react-three__uikit@1.0.59.patch

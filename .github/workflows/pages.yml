@@ -15,51 +15,38 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   build:
+    needs: ci
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
           version: 10.12.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'pnpm'
 
       - name: Install root dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build library
-        run: pnpm build
-
-      - name: Install widgets demo dependencies
-        run: cd demos/widgets && pnpm install --frozen-lockfile
-
-      - name: Build widgets demo
-        run: cd demos/widgets && pnpm build
-
-      - name: Build VitePress documentation
-        run: pnpm docs:build
-
-      - name: Create combined pages directory
-        run: |
-          mkdir -p _pages
-          cp demos/index.html _pages/
-          mkdir -p _pages/widgets
-          cp -r demos/widgets/dist/* _pages/widgets/
-          cp -r docs/.vitepress/dist/* _pages/
+      - name: Build all demos and documentation
+        run: bash scripts/build-all-demos.sh
 
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: '_pages'
 

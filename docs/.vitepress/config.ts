@@ -1,4 +1,14 @@
 import { defineConfig } from 'vitepress'
+import typedocSidebar from '../api/typedoc-sidebar.json'
+
+// Fix typedoc sidebar links (remove /docs prefix)
+const apiSidebar = typedocSidebar.map((section: any) => ({
+  ...section,
+  items: section.items.map((item: any) => ({
+    ...item,
+    link: item.link.replace('/docs', '')
+  }))
+}))
 
 export default defineConfig({
   title: 'r3f-xr-widgets',
@@ -10,7 +20,7 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'Components', link: '/components/' },
       { text: 'API', link: '/api/' },
-      { text: 'Demos', link: 'https://icepick.info/r3f-xr-widgets/widgets/' }
+      { text: 'Demos', link: '/demos' }
     ],
 
     sidebar: {
@@ -49,16 +59,7 @@ export default defineConfig({
           ]
         }
       ],
-      '/api/': [
-        {
-          text: 'API Reference',
-          items: [
-            { text: 'Components', link: '/api/components' },
-            { text: 'Hooks', link: '/api/hooks' },
-            { text: 'Utilities', link: '/api/utilities' }
-          ]
-        }
-      ]
+      '/api/': apiSidebar
     },
 
     socialLinks: [

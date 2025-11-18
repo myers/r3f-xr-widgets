@@ -139,8 +139,7 @@ Now that you have a basic scene running:
 
 - Explore [Components](/components/) to learn about all available widgets
 - Check out [Examples](/guide/examples/basic-window) for common patterns
-- Try the [Live Demos](https://icepick.info/r3f-xr-widgets/widgets/) in your VR headset
-- Read the [API Reference](/api/) for detailed prop documentation
+- Try the [Live Demos](/demos) in your VR headset
 
 ::: tip Need Help?
 - Check [GitHub Issues](https://github.com/myers/r3f-xr-widgets/issues) for common problems

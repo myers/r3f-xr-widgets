@@ -17,7 +17,7 @@ hero:
       link: /components/
     - theme: alt
       text: Try Demos
-      link: https://icepick.info/r3f-xr-widgets/widgets/
+      link: /demos
 
 features:
   - title: Resizable Windows
@@ -66,11 +66,3 @@ function App() {
   )
 }
 ```
-
-## Why r3f-xr-widgets?
-
-Building WebXR applications requires solving common UX patterns like window management, session handling, and user-friendly interactions. **r3f-xr-widgets** provides these patterns as production-ready components, so you can focus on your unique experience.
-
-::: tip Live Demos
-Try the interactive demos in your VR headset or browser at [icepick.info/r3f-xr-widgets/widgets](https://icepick.info/r3f-xr-widgets/widgets)
-:::

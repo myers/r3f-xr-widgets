@@ -1,4 +1,7 @@
 import { ShaderMaterial, Vector3, Color } from 'three'
+import createDebug from 'debug'
+
+const debug = createDebug('r3f-xr-widgets:materials:arc')
 
 // Arc shader - vertex shader
 export const arcVertexShader = /* glsl */ `
@@ -73,6 +76,8 @@ void main() {
  * Renders a 90-degree arc in the corner of a mesh using UV-space coordinates.
  * Used by HorizonWindow to create interactive corner handles for resizing windows.
  * The arc appearance can be controlled via opacity for hover and proximity effects.
+ *
+ * @group Materials
  */
 export class ArcMaterial extends ShaderMaterial {
   declare color: Color
@@ -95,7 +100,7 @@ export class ArcMaterial extends ShaderMaterial {
       }
     })
 
-    console.log('[ArcMaterial] Constructor called with:', {
+    debug('[ArcMaterial] Constructor called with:', {
       arcRadiusFraction,
       lineThicknessFraction,
       lineColor,
@@ -107,7 +112,7 @@ export class ArcMaterial extends ShaderMaterial {
 
     // Check for shader compilation errors
     this.onBeforeCompile = () => {
-      console.log('[ArcMaterial] Shader compiled successfully')
+      debug('[ArcMaterial] Shader compiled successfully')
     }
   }
 
