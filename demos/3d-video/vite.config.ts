@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
+import pkg from './package.json'
 
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production'
@@ -8,7 +9,7 @@ export default defineConfig(({ mode }) => {
   console.log(`🚀 Running in ${mode} mode - Using library ${isProduction ? 'dist' : 'source'} files`)
 
   return {
-    base: '/r3f-xr-widgets/3d-video/',
+    base: pkg.config.base,
     plugins: [react()],
     resolve: {
       // In development: alias to source files for instant HMR
@@ -31,7 +32,8 @@ export default defineConfig(({ mode }) => {
       ],
     },
     server: {
-      port: 9004,
+      port: pkg.config.port,
+      strictPort: true,
     },
     build: {
       sourcemap: true,

@@ -1,11 +1,15 @@
 {
-  "name": "r3f-xr-widgets-horizon-window-demo",
-  "description": "HorizonWindow demo showcasing multiple styled windows with UIKit components in various 3D environments",
+  "name": "horizon-window-demo",
+  "description": "Interactive resizable window with UIKit-based design featuring arc handles, title bar movement, and proximity-based edge visibility",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "config": {
+    "port": 9002,
+    "base": "/r3f-xr-widgets/horizon-window/"
+  },
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -26,7 +30,7 @@
     "three": "^0.165.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-basic-ssl": "^2.1.0",
+    "@vitejs/plugin-react": "^5.0.4",
     "vite": "^7.1.9"
   }
 }

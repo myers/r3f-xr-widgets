@@ -26,6 +26,8 @@ export type IconType = keyof typeof ICONS
 export interface IconFlashProps {
   disabled?: boolean
   name?: IconType
+  /** Name for the Three.js object for scene queries */
+  object3DName?: string
 }
 
 /**
@@ -33,7 +35,7 @@ export interface IconFlashProps {
  * @group Components
  */
 export const IconFlash = (props: IconFlashProps) => {
-  const { disabled = false, name = "play" } = props
+  const { disabled = false, name = "play", object3DName } = props
   const rootRef = useRef<VanillaContainer>(null)
   const initalScale = 1
   const iconOpacity = useMemo(() => signal(1), [])
@@ -70,6 +72,7 @@ export const IconFlash = (props: IconFlashProps) => {
   return (
     <Container
       ref={rootRef}
+      object3DName={object3DName}
       borderRadius={50}
       backgroundColor="black"
       padding={10}

@@ -4,16 +4,17 @@ import { QuadVideoPlayer } from 'r3f-xr-widgets'
 export interface VideoPlayerContentProps {
   videoUrl: string
   title?: string
+  layout: 'default' | 'mono' | 'stereo-left-right' | 'stereo-top-bottom'
 }
 
-export function VideoPlayerContent({ videoUrl, title }: VideoPlayerContentProps) {
+export function VideoPlayerContent({ videoUrl, title, layout }: VideoPlayerContentProps) {
   // Create video element
   const videoElement = useMemo(() => {
     const video = document.createElement('video')
     video.crossOrigin = 'anonymous'
     video.loop = true
     video.playsInline = true
-    video.muted = false
+    video.muted = true // Muted for autoplay policy
     return video
   }, [])
 
@@ -44,13 +45,14 @@ export function VideoPlayerContent({ videoUrl, title }: VideoPlayerContentProps)
     <QuadVideoPlayer
       video={videoElement}
       renderer="videoxr"
+      layout={layout}
       showControls={true}
       showActionIndicator={true}
       enableXRControllers={true}
       controlPanelTitle={title || ''}
-      xrRequirePointer={true}
+      requirePointerOnTarget={true}
       width="100%"
-      flexGrow={1}
+    // pixelSize={0.004}
     />
   )
 }

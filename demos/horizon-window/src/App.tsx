@@ -1,9 +1,8 @@
 import { Canvas } from '@react-three/fiber'
 import { Container, Text, setPreferredColorScheme } from '@react-three/uikit'
-import { colors } from '@react-three/uikit-default'
 import { createXRStore, IfInSessionMode, noEvents, PointerEvents, XR, XROrigin } from '@react-three/xr'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { AudioEffects, HorizonCursorMaterial, HorizonWindow, HorizonWindowTitleBar, Skybox, SplashScreen } from 'r3f-xr-widgets'
+import { AudioEffects, DEFAULT_EYE_LEVEL, EyeLevelGroup, GridFloor, HorizonCursorMaterial, HorizonWindow, HorizonWindowTitleBar, Skybox, SplashScreen } from 'r3f-xr-widgets'
 
 const store = createXRStore({
   foveation: 0,
@@ -43,20 +42,22 @@ export default function App() {
         events={noEvents}
         gl={{ localClippingEnabled: true }}
         style={{ width: '100%', flexGrow: 1 }}
-        camera={{ position: [0, 0, 0.65] }}
+        camera={{ position: [0, 0, 0.5] }}
       >
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         <PointerEvents batchEvents={false} />
         <XR store={store}>
           <IfInSessionMode allow="immersive-vr">
-            <Skybox />
+            <Skybox color="#404040" />
+            <GridFloor />
           </IfInSessionMode>
-          <XROrigin position-y={-1.5} position-z={0.5} />
           <AudioEffects />
 
           {/* Single HorizonWindow with interactive content */}
-          <WindowSystem />
+          <EyeLevelGroup defaultEyeLevel={DEFAULT_EYE_LEVEL}>
+            <WindowSystem />
+          </EyeLevelGroup>
         </XR>
       </Canvas>
     </>
@@ -92,7 +93,7 @@ function WindowSystem() {
   }
 
   return (
-    <group position-y={-0.3} position-z={-1}>
+    <group position-z={-1}>
       <HorizonWindow
         titleBar={<HorizonWindowTitleBar title="Hello World" onClose={handleClose} />}
         width={width}
@@ -102,14 +103,18 @@ function WindowSystem() {
         minHeight={250}
         maxHeight={1400}
         pixelSize={0.0015}
+        onResize={(w, h) => {
+          setWidth(w)
+          setHeight(h)
+        }}
       >
         <Container
-          backgroundColor={colors.background}
           flexDirection="column"
           justifyContent="center"
           alignItems="center"
           gap={20}
           flexGrow={1}
+          backgroundColor="black"
         >
           <Text fontSize={48} color="rgb(243,244,246)">
             Hello World
@@ -122,7 +127,7 @@ function WindowSystem() {
             gap={10}
             onClick={() => {
               console.log('[BUTTON CLICK] Before:', width, height)
-              // Test: Toggle between two sizes
+              // Toggle between two sizes
               setWidth(width === 1000 ? 1400 : 1000)
               setHeight(height === 600 ? 900 : 600)
               console.log('[BUTTON CLICK] After:', width === 1000 ? 1400 : 1000, height === 600 ? 900 : 600)

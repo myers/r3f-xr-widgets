@@ -18,14 +18,21 @@ const styles = {
     borderRadius: '8px',
     boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
     maxWidth: '50vw',
+    maxHeight: '90vh',
+    display: 'flex',
+    flexDirection: 'column' as const,
   },
   childrenWrapper: {
     marginBottom: '10px',
+    overflow: 'auto',
+    flex: 1,
+    minHeight: 0,
   },
   buttonContainer: {
     display: 'flex',
     justifyContent: 'center',
     margin: '20px',
+    flexShrink: 0,
   },
   button: {
     padding: '16px 32px',
@@ -169,12 +176,14 @@ const EnterXRButton = ({ store, modes }: { store: XRStore, modes: XRSessionMode[
       <div style={styles.buttonContainer}>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
+            id="enter-ar-btn"
             onClick={() => store.enterXR('immersive-ar')}
             style={styles.button}
           >
             Enter AR
           </button>
           <button
+            id="enter-vr-btn"
             onClick={() => store.enterXR('immersive-vr')}
             style={styles.button}
           >
@@ -198,6 +207,7 @@ const EnterXRButton = ({ store, modes }: { store: XRStore, modes: XRSessionMode[
   return (
     <div style={styles.buttonContainer}>
       <button
+        id={ar ? 'enter-ar-btn' : vr ? 'enter-vr-btn' : undefined}
         onClick={handleClick}
         disabled={!ar && !vr}
         style={{

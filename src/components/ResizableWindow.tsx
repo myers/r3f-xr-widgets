@@ -1,19 +1,11 @@
 import { RoundedBox, useGLTF } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
 import { ReactNode, useRef, useState, useEffect } from 'react'
-import { Euler, Group, Mesh, Quaternion, Vector3 } from 'three'
-import { damp } from 'three/src/math/MathUtils.js'
+import { Group, Mesh, Vector3 } from 'three'
 import { HandleTarget, HandleStore, defaultApply } from '@react-three/handle'
 import { HandleWithAudio } from './HandleWithAudio'
 import { Hover } from './Hover'
+import { CylindricalBillboard } from './CylindricalBillboard'
 import rotateModelUrl from '../assets/models/rotate.glb?url'
-
-// Helper objects for rotation calculations
-const eulerHelper = new Euler()
-const quaternionHelper = new Quaternion()
-const vectorHelper1 = new Vector3()
-const vectorHelper2 = new Vector3()
-const zAxis = new Vector3(0, 0, 1)
 
 /**
  * Props for the ResizableWindow component
@@ -30,6 +22,8 @@ export interface ResizableWindowProps {
   initiallyRotateTowardsCamera?: boolean
   /** Continuously rotate window to face camera. Defaults to false */
   autoRotateToCamera?: boolean
+  /** Rotate window to face camera while dragging. Defaults to true */
+  rotateOnDrag?: boolean
   /** Callback when window position changes */
   onPositionChange?: (position: Vector3) => void
   /** Callback when window scale changes */
@@ -92,16 +86,15 @@ export function ResizableWindow(props: ResizableWindowProps) {
     position = [0, 0, -0.4],
     initiallyRotateTowardsCamera = true,
     autoRotateToCamera = false,
+    rotateOnDrag = true,
     onScaleChange,
     aspectRatio = 16 / 9,
     baseScale = 0.3,
     handleColor = 'grey'
   } = props
   const groupRef = useRef<Group>(null)
-  const rotatingGroupRef = useRef<Group>(null)
   const storeRef = useRef<HandleStore<unknown>>(null)
   const [windowPosition, setWindowPosition] = useState(position)
-  const [hasInitiallyRotated, setHasInitiallyRotated] = useState(false)
   const [currentScale, setCurrentScale] = useState(1)
 
   // Update position when prop changes
@@ -109,44 +102,10 @@ export function ResizableWindow(props: ResizableWindowProps) {
     setWindowPosition(position)
   }, [position])
 
-  // Auto-rotate to face camera
-  useFrame((state, dt) => {
-    if (rotatingGroupRef.current == null) {
-      return
-    }
-
-    // Handle initial rotation
-    if (initiallyRotateTowardsCamera && !hasInitiallyRotated) {
-      state.camera.getWorldPosition(vectorHelper1)
-      rotatingGroupRef.current.getWorldPosition(vectorHelper2)
-      quaternionHelper.setFromUnitVectors(zAxis, vectorHelper1.sub(vectorHelper2).normalize())
-      eulerHelper.setFromQuaternion(quaternionHelper, 'YXZ')
-      rotatingGroupRef.current.rotation.y = eulerHelper.y
-      setHasInitiallyRotated(true)
-      return
-    }
-
-    // Handle continuous rotation
-    if (!autoRotateToCamera) {
-      return
-    }
-
-    // Only rotate if not being dragged
-    const handleState = storeRef.current?.getState()
-    if (handleState && handleState.current.pointerAmount > 0) {
-      return
-    }
-    state.camera.getWorldPosition(vectorHelper1)
-    rotatingGroupRef.current.getWorldPosition(vectorHelper2)
-    quaternionHelper.setFromUnitVectors(zAxis, vectorHelper1.sub(vectorHelper2).normalize())
-    eulerHelper.setFromQuaternion(quaternionHelper, 'YXZ')
-    rotatingGroupRef.current.rotation.y = damp(rotatingGroupRef.current.rotation.y, eulerHelper.y, 10, dt)
-  })
-
   return (
     <HandleTarget ref={groupRef}>
       <group position={windowPosition}>
-        <group ref={rotatingGroupRef}>
+        <CylindricalBillboard initialRotation={initiallyRotateTowardsCamera} autoRotate={autoRotateToCamera} rotateOnDrag={rotateOnDrag}>
           <group>
             <HandleTarget>
               {/* Background plane */}
@@ -204,7 +163,7 @@ export function ResizableWindow(props: ResizableWindowProps) {
             <HandleWithAudio targetRef="from-context" ref={storeRef} scale={false} multitouch={false} rotate={false}>
               <Hover>
                 {(hovered) => (
-                  <RoundedBox scale={(hovered ? 0.125 : 0.1) * currentScale} args={[2, 0.2, 0.2]}>
+                  <RoundedBox scale={hovered ? 0.125 : 0.1} args={[2, 0.2, 0.2]}>
                     <meshStandardMaterial
                       emissiveIntensity={hovered ? 0.3 : 0}
                       emissive={0xffffff}
@@ -216,7 +175,7 @@ export function ResizableWindow(props: ResizableWindowProps) {
               </Hover>
             </HandleWithAudio>
           </group>
-        </group>
+        </CylindricalBillboard>
       </group>
     </HandleTarget>
   )

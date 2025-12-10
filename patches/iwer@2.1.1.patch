@@ -1,3 +1,15 @@
+diff --git a/lib/device/XRDevice.d.ts b/lib/device/XRDevice.d.ts
+index c5fed22f5153d82f590573f4f34d14a417eac653..e56ece70b84b561011e9de2afa4697915927e4ef 100644
+--- a/lib/device/XRDevice.d.ts
++++ b/lib/device/XRDevice.d.ts
+@@ -51,6 +51,7 @@ export interface DevUIConstructor {
+ }
+ export interface DevUI {
+     version: string;
++    hideUI: boolean;
+     render(time: number): void;
+     get devUICanvas(): HTMLCanvasElement;
+     get devUIContainer(): HTMLDivElement;
 diff --git a/lib/device/XRDevice.js b/lib/device/XRDevice.js
 index 51d8dfdc665e7dd39be519c4781515aa87ff69ba..c3af63af51e73392a1171c289dc6555473f714d1 100644
 --- a/lib/device/XRDevice.js

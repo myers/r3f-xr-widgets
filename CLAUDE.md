@@ -11,10 +11,21 @@ This is a library package (`r3f-xr-widgets`) that provides reusable XR/VR widget
 - `pnpm dev` - Build library in watch mode for development
 - `pnpm build` - Build the library for production (outputs to `dist/`)
 - `pnpm typecheck` - Run TypeScript type checking without emitting files
-- `pnpm demo` - Start the resizable window demo dev server with HTTPS (required for XR)
-- `pnpm demo:resizable-window` - Start the resizable window demo (same as `pnpm demo`)
-- `pnpm demo:landing` - Serve the demos landing page
-- `pnpm demo:build` - Build demos for production
+
+### Running Demos
+
+To run a demo, cd into its directory and run `pnpm dev`:
+
+```bash
+cd demos/video-player && pnpm dev
+```
+
+Available demos:
+- `demos/resizable-window/` - Port 9000
+- `demos/horizon-window/` - Port 9001
+- `demos/video-player/` - Port 9003
+- `demos/3d-video/` - Port 9004
+- `demos/cubemap-skybox/` - Port 9005
 
 ## Architecture
 
@@ -62,21 +73,14 @@ The library exports XR-ready React components and utilities from `src/index.ts`:
 
 ### Demo Applications
 
-The demos (`demos/` directory) showcase the library components:
-
-**Demos Landing Page** (`demos/index.html`):
-- Overview of all available demos
-- Links to individual demo applications
-- Run with `pnpm demo:landing`
+The demos (`demos/` directory) showcase the library components. Run demos by cd'ing into the demo directory and running `pnpm dev`.
 
 **Resizable Window Demo** (`demos/resizable-window/`):
 - Showcases ResizableWindow component
 - XR store setup with `createXRStore` from `@react-three/xr`
 - SplashScreen for VR/AR entry
-- HTTPS dev server (required for WebXR)
 - UIKit integration for 2D content inside windows
 - Camera positioned at eye level (1.5m)
-- Run with `pnpm demo` or `pnpm demo:resizable-window`
 
 ## Build System
 
@@ -102,3 +106,85 @@ The demos (`demos/` directory) showcase the library components:
 - NEVER EVER EVER set a `<color attach="background" ... />` when using an XRLayer.  The layer will not be visible.
 - when you are looking test failures remember you can use pnpm test <filename>
 - no one is using this library yet, we don't need to worry about breaking changes
+
+## Quest Hardware Testing
+
+Use the global `quest-dev` and `cdp-cli` tools for Quest development.
+
+### Workflow
+
+1. **Start demo dev server** (in one terminal):
+   ```bash
+   cd demos/video-player && pnpm dev
+   ```
+
+2. **Open on Quest** (in another terminal):
+   ```bash
+   quest-dev open http://localhost:9003/r3f-xr-widgets/video-player/
+   ```
+
+3. **Control Quest browser**:
+   ```bash
+   cdp-cli tabs                              # List pages
+   cdp-cli click "Video" "#enter-vr-btn" -g  # Click VR button (needs -g for user gesture)
+   cdp-cli console "Video" --all             # View console
+   cdp-cli go "Video" reload                 # Reload page
+   ```
+
+4. **Take XR screenshot**:
+   ```bash
+   quest-dev screenshot screenshots/test.jpg
+   ```
+
+### Port Reference
+| Demo | Port | URL Path |
+|------|------|----------|
+| resizable-window | 9000 | /r3f-xr-widgets/resizable-window/ |
+| horizon-window | 9001 | /r3f-xr-widgets/horizon-window/ |
+| video-player | 9003 | /r3f-xr-widgets/video-player/ |
+| 3d-video | 9004 | /r3f-xr-widgets/3d-video/ |
+| cubemap-skybox | 9005 | /r3f-xr-widgets/cubemap-skybox/ |
+
+### Notes
+- `quest-dev open` sets up ADB port forwarding automatically
+- Use `-g` flag with `cdp-cli click` for WebXR session requests
+- `quest-dev screenshot` captures the Quest display (works in XR mode)
+- `cdp-cli screenshot` only captures the 2D browser view
+- chrome-devtools MCP cannot control the Quest browser - you MUST use cdp-cli
+- only stop running servers and other background tasks by using your tools to manage tasks.  do no use lsof and kill.
+- it is critical that you run vite on the same port or you get a security dialog that a human has to approve of on the quest
+
+## pnpm Patch Workflow
+
+**IMPORTANT:** Never edit files directly in `node_modules/`. Those changes won't persist and Vite's bundler won't pick them up. Use the pnpm patch workflow instead:
+
+1. `pnpm patch <package>@<version>` - Creates a temp directory with the package source
+2. Edit files in that temp directory (path shown in output)
+3. `pnpm patch-commit <path>` - Generates/updates the patch file in `patches/`
+4. `pnpm install --force` - Applies the patch to node_modules
+
+Example:
+```bash
+pnpm patch @pmndrs/xr@6.6.27
+# Output: You can now edit the package at: /path/to/.pnpm_patches/@pmndrs/xr@6.6.27
+# Edit files in that directory...
+pnpm patch-commit /path/to/.pnpm_patches/@pmndrs/xr@6.6.27
+pnpm install --force
+```
+
+The patch file is stored in `patches/` and referenced in `package.json` under `patchedDependencies`. Use the `pnpm-patch` skill for guided help.
+- Please don't edit files in the 'patches/', use the pnpm patch workflow to make changes.
+
+
+## Testing
+
+There are two environments to test in:
+
+1. **Desktop**: Use the chrome-devtools MCP. Do not use `cdp-cli` for desktop testing.
+
+2. **Quest hardware**: Use `quest-dev` and `cdp-cli` commands. See "Quest Hardware Testing" section above.
+   - This environment can be flaky and require human intervention
+   - Make sure code is working on desktop before testing on Quest
+   - All screenshots should be saved in the workspace root / screenshots
+   - Please leave console.log statements until after code review
+- <XRLayer> has a fallback that is used with xr layers are not supported

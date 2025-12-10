@@ -1,37 +1,11 @@
-import { ReactNode, useMemo, useEffect } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { createXRStore, XRStoreOptions, XRStore, XR } from '@react-three/xr'
+import { XRStore, XR } from '@react-three/xr'
 import { PointerEvents } from '@react-three/xr'
-import { EnterXRButton } from '../components/EnterXRButton'
-import { LOCAL_XR_ASSET_PATH } from './xr-test-config'
 import createDebug from 'debug'
 
 const debug = createDebug('r3f-xr-widgets:test:setup')
-
-/**
- * Hook that creates an XR store and automatically cleans up navigator.xr on unmount.
- * This prevents "InvalidStateError" and "Context Lost" errors on Storybook reruns.
- */
-export function useXRStore(options?: XRStoreOptions): XRStore {
-  const store = useMemo(() => createXRStore({
-    // Use local assets to avoid CDN calls in tests
-    baseAssetPath: LOCAL_XR_ASSET_PATH,
-    ...options
-  }), [])
-
-  useEffect(() => {
-    return () => {
-      // Use the store's cleanupEmulator() method which internally waits for
-      // emulator injection to complete before cleaning up
-      store.cleanupEmulator().catch((err) => {
-        debug('useXRStore: Error during cleanup:', err)
-      })
-    }
-  }, [store])
-
-  return store
-}
 
 /**
  * Internal component that captures scene and stores it on canvas element.
@@ -50,27 +24,45 @@ function SceneCapture({ store }: { store: XRStore }) {
   return null
 }
 
+export interface XRTestCanvasProps {
+  store: XRStore
+  children: ReactNode
+}
+
 /**
  * Canvas wrapper for XR tests.
- * Provides complete XR test setup with store creation, emulator config,
- * Enter VR button, and scene/store references on canvas element.
+ * Accepts a pre-created XR store (from createTestXRStore) to avoid act() warnings.
+ * Provides Enter VR button and scene/store references on canvas element.
  */
-export function XRTestCanvas({ children, devUI = false }: { children: ReactNode; devUI?: boolean }) {
-  // Create XR store with default test emulator config
-  const store = useXRStore({
-    emulate: {
-      type: 'metaQuest3',
-      inject: true,
-      primaryInputMode: 'controller',
-      devUI, // Configurable DevUI (default: false to prevent thumbstick interference)
-    },
-    offerSession: false,
-  })
+export function XRTestCanvas({ store, children }: XRTestCanvasProps) {
+  // Track session state to hide button when in VR
+  const [session, setSession] = useState<XRSession | null>(null)
+
+  useEffect(() => {
+    // Subscribe to store for session changes
+    const unsubscribe = store.subscribe((state) => {
+      setSession(state.session ?? null)
+    })
+    // Initialize with current state
+    setSession(store.getState().session ?? null)
+    return unsubscribe
+  }, [store])
+
+  // Register cleanup on unmount
+  useEffect(() => {
+    return () => {
+      store.cleanupEmulator().catch((err) => {
+        debug('XRTestCanvas: Error during cleanup:', err)
+      })
+    }
+  }, [store])
 
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-      {/* Enter VR button - needed for all tests */}
-      <EnterXRButton store={store} mode="immersive-vr" />
+      {/* Simple Enter VR button - no polling hook, iwer already ready */}
+      {session == null && (
+        <button onClick={() => store.enterXR('immersive-vr')}>Enter VR</button>
+      )}
 
       <Canvas camera={{ position: [0, 1.6, 0], fov: 75 }}>
         <color attach="background" args={['#1a1a1a']} />

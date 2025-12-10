@@ -23,7 +23,7 @@ import { signal } from "@preact/signals-core"
  */
 export type VolumeControlProperties = {
   video?: HTMLVideoElement
-  muteButtonName?: string
+  muteButtonObject3DName?: string
 } & Omit<ContainerProperties, "children">
 
 /**
@@ -32,7 +32,7 @@ export type VolumeControlProperties = {
  */
 export const VolumeControl: (
   props: VolumeControlProperties & RefAttributes<VanillaContainer>,
-) => ReactNode = forwardRef(({ video, muteButtonName, ...props }, ref) => {
+) => ReactNode = forwardRef(({ video, muteButtonObject3DName, ...props }, ref) => {
   const [muted, setMuted] = useState(false)
   const volumeSignal = useMemo(() => signal(1), [])
 
@@ -86,7 +86,7 @@ export const VolumeControl: (
         cursor="pointer"
         onClick={toggleMute}
         padding={8}
-        name={muteButtonName}
+        object3DName={muteButtonObject3DName}
       >
         {(() => {
           const VolumeIcon = muted ? VolumeX : Volume2

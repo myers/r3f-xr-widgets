@@ -3,6 +3,7 @@ packages:
 
 patchedDependencies:
   iwer@2.1.1: patches/iwer@2.1.1.patch
-  '@pmndrs/xr@6.6.27': patches/@pmndrs__xr@6.6.27.patch
-  '@pmndrs/uikit@1.0.59': patches/@pmndrs__uikit@1.0.59.patch
-  '@react-three/uikit@1.0.59': patches/@react-three__uikit@1.0.59.patch
+  '@react-three/uikit@1.0.60': patches/@react-three__uikit@1.0.60.patch
+  '@iwer/devui@1.1.2': patches/@iwer__devui@1.1.2.patch
+  '@pmndrs/xr@6.6.28': patches/@pmndrs__xr@6.6.28.patch
+  '@react-three/xr@6.6.28': patches/@react-three__xr@6.6.28.patch

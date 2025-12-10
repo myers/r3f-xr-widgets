@@ -11,6 +11,8 @@ import { clamp } from 'three/src/math/MathUtils.js'
 import { ArcMaterial } from './ArcMaterial'
 import { EdgeUVMaterial } from './EdgeUVMaterial'
 import { HandleWithAudio } from './HandleWithAudio'
+import { montserrat } from '@pmndrs/msdfonts'
+
 import createDebug from 'debug'
 
 const debug = createDebug('r3f-xr-widgets:components:horizon-window')
@@ -400,19 +402,34 @@ export function HorizonWindow(props: HorizonWindowProps) {
     [],
   )
 
+  // Track initial position for resize compensation
+  const initialPositionY = useRef<number>(0)
+
   // Shared resize callback for all corner handles
   const handleResize = (state: HandleState<unknown>) => {
     debug('[HANDLE RESIZE]', { first: state.first, last: state.last, height, width, heightValue: height?.value, widthValue: width?.value })
     if (state.first) {
       initialHeight.current = height.value
       initialWidth.current = width.value
+      initialPositionY.current = movableGroupRef.current?.position.y ?? 0
       setBorderVisible(true)
     } else if (!state.first && initialHeight.current != null && initialWidth.current != null) {
       // Update signals during drag for real-time resizing
       const newHeight = clamp(state.current.scale.y * initialHeight.current, minHeight, maxHeight)
       const newWidth = clamp(state.current.scale.x * initialWidth.current, minWidth, maxWidth)
+
+      // Calculate height delta and offset position to keep bottom edge stationary
+      const heightDelta = newHeight - initialHeight.current
+      const positionOffset = (heightDelta * pixelSize) / 2
+
       height.value = newHeight
       width.value = newWidth
+
+      // Move window up to compensate for height increase (keeps bottom in place)
+      if (movableGroupRef.current) {
+        movableGroupRef.current.position.y = initialPositionY.current + positionOffset
+      }
+
       if (state.last) {
         onResize?.(newWidth, newHeight)
         setBorderVisible(false)
@@ -436,6 +453,7 @@ export function HorizonWindow(props: HorizonWindowProps) {
         width={width}
         height={height}
         pixelSize={pixelSize}
+        fontFamilies={{ montserrat }}
       >
         {/* Top row: Top-Left + Spacer + Top-Right */}
         <Container flexDirection="row" height={40}>
@@ -484,7 +502,7 @@ export function HorizonWindow(props: HorizonWindowProps) {
             />
           </Container>
 
-          <Container flexGrow={1} ref={innerTarget} backgroundColor={"black"}>
+          <Container flexGrow={1} ref={innerTarget}>
             {children}
           </Container>
 

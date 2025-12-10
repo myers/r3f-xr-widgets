@@ -1,15 +1,15 @@
 import { Container, Text } from '@react-three/uikit'
-import { colors } from '@react-three/uikit-default'
-
+import { ThumbnailCard } from './ThumbnailCard'
 export interface VideoOption {
   url: string
   title: string
   thumbnail?: string
+  layout: 'default' | 'mono' | 'stereo-left-right' | 'stereo-top-bottom'
 }
 
 export interface VideoSelectorProps {
   videos: VideoOption[]
-  onSelect: (url: string, title: string) => void
+  onSelect: (video: VideoOption) => void
 }
 
 export function VideoSelector({ videos, onSelect }: VideoSelectorProps) {
@@ -21,6 +21,7 @@ export function VideoSelector({ videos, onSelect }: VideoSelectorProps) {
       gap={20}
       flexGrow={1}
       padding={40}
+      backgroundColor="black"
     >
       <Text fontSize={36} color="rgb(243,244,246)" marginBottom={20}>
         Select a Video
@@ -31,30 +32,15 @@ export function VideoSelector({ videos, onSelect }: VideoSelectorProps) {
         gap={20}
         flexWrap="wrap"
         justifyContent="center"
+        width="100%"
+        height={600}
       >
         {videos.map((video) => (
-          <Container
+          <ThumbnailCard
             key={video.url}
-            onClick={() => {
-              console.log('[VideoSelector] Selected:', video.title)
-              onSelect(video.url, video.title)
-            }}
-            padding={20}
-            backgroundColor={colors.buttonBackground}
-            borderRadius={8}
-            cursor="pointer"
-            hover={{
-              backgroundColor: colors.buttonBackgroundHover,
-            }}
-            width={300}
-            height={200}
-            justifyContent="center"
-            alignItems="center"
-          >
-            <Text fontSize={24} color="white" textAlign="center">
-              {video.title}
-            </Text>
-          </Container>
+            video={video}
+            onSelect={onSelect}
+          />
         ))}
       </Container>
     </Container>

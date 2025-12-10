@@ -1,5 +1,6 @@
 import { Container, Text } from '@react-three/uikit'
 import { ArrowLeftIcon, XIcon } from '@react-three/uikit-lucide'
+import { montserrat } from '@pmndrs/msdfonts'
 
 export interface VideoPlayerTitleBarProps {
   title: string
@@ -32,7 +33,7 @@ export function VideoPlayerTitleBar({ title, showBack, onBack, onClose }: VideoP
       )}
 
       {/* Title */}
-      <Text fontSize={24} color="white" flexGrow={1}>
+      <Text fontFamily="montserrat" fontSize={24} color="white" flexGrow={1} fontFamilies={{ montserrat }}>
         {title}
       </Text>
 

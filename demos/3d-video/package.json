@@ -1,9 +1,13 @@
 {
   "name": "3d-video-demo",
-  "description": "Stereoscopic 3D 360° video player supporting side-by-side and top-bottom formats for immersive VR video experiences",
+  "description": "VR video player demo - reimplementation of the XR Layer Eqrt video demo using React Three Fiber, React XR, and UIKit",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "config": {
+    "port": 9004,
+    "base": "/r3f-xr-widgets/3d-video/"
+  },
   "scripts": {
     "dev": "vite",
     "dev:prod": "vite --mode production",

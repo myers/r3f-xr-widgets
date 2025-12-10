@@ -7,6 +7,8 @@ import { WaitingIcon } from "./WaitingIcon"
  */
 export interface ActionIndicatorProps {
   video: HTMLVideoElement
+  /** Name for the Three.js object for scene queries */
+  object3DName?: string
 }
 
 /**
@@ -14,7 +16,7 @@ export interface ActionIndicatorProps {
  * @group Components
  */
 export const ActionIndicator = (props: ActionIndicatorProps) => {
-  const { video } = props
+  const { video, object3DName } = props
   const [icon, setIcon] = useState<IconType | null>(null)
   const [isBuffering, setIsBuffering] = useState(false)
   const [iconKey, setIconKey] = useState(0) // Key to force remount of IconFlash
@@ -97,8 +99,8 @@ export const ActionIndicator = (props: ActionIndicatorProps) => {
     }
   }, [video])
 
-  if (isBuffering) return <WaitingIcon />
+  if (isBuffering) return <WaitingIcon object3DName={object3DName} />
   if (!icon) return null
 
-  return <IconFlash key={iconKey} name={icon} />
+  return <IconFlash key={iconKey} name={icon} object3DName={object3DName} />
 }

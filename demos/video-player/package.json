@@ -1,12 +1,16 @@
 {
-  "name": "r3f-xr-widgets-video-player-demo",
-  "description": "Immersive 360° equirectangular video player with playback controls, timeline seeking, and spatial audio in VR",
+  "name": "video-player-demo",
+  "description": "QuadVideoPlayer component demo - complete VR video player with XR controller support, action indicators, and auto-hide control panel",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "config": {
+    "port": 9003,
+    "base": "/r3f-xr-widgets/video-player/"
+  },
   "scripts": {
-    "dev": "vite --host",
-    "dev:prod": "vite --host --mode production",
+    "dev": "vite",
+    "dev:prod": "vite --mode production",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -25,7 +29,6 @@
     "three": "^0.165.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-basic-ssl": "^2.1.0",
     "@vitejs/plugin-react": "^5.0.4",
     "vite": "^7.1.9"
   }

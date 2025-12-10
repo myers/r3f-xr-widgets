@@ -1,9 +1,7 @@
 import { Container, Content, type ContainerProperties } from '@react-three/uikit'
 import { XRLayer } from '@react-three/xr'
-import { useState, useEffect, useMemo } from 'react'
-import createDebug from 'debug'
-
-const debug = createDebug('r3f-xr-widgets:components:video-xr')
+import { useMemo } from 'react'
+import { useVideoMetadata } from '../hooks/useVideoMetadata'
 
 /**
  * Props for the VideoXR component
@@ -23,11 +21,29 @@ export interface VideoXRProperties extends Omit<ContainerProperties, 'children'>
   // XRLayer specific
   shape?: 'quad' | 'cylinder' | 'equirect'
   layout?: 'default' | 'mono' | 'stereo-left-right' | 'stereo-top-bottom'
+  /** Render order for XRLayer compositing. Higher values render on top. @default 0 */
+  renderOrder?: number
 }
 
 /**
- * Video component that renders using XRLayer with auto-sizing
+ * Video player that wraps XRLayer in UIKit's Content component.
+ *
+ * Waits for video metadata to load, then creates an XRLayer sized to the video's
+ * actual dimensions (pixelWidth, pixelHeight). This ensures correct aspect ratio
+ * and integrates with UIKit's layout system.
+ *
+ * Use this instead of raw XRLayer when you need UIKit layout integration.
+ * For 360° videos, see EquirectPlayer which uses raw XRLayer.
+ *
  * @group Components
+ *
+ * @example
+ * ```tsx
+ * <VideoXR src="/video.mp4" shape="quad" flexGrow={1} />
+ * ```
+ *
+ * @see {@link useVideoMetadata} - Hook used internally to get video dimensions
+ * @see {@link EquirectPlayer} - For 360° videos (uses raw XRLayer)
  */
 export function VideoXR(allProps: VideoXRProperties) {
   const {
@@ -42,12 +58,9 @@ export function VideoXR(allProps: VideoXRProperties) {
     playbackRate = 1,
     shape = 'quad',
     layout = 'default',
+    renderOrder = 0,
     ...containerProps
   } = allProps
-  const [videoDimensions, setVideoDimensions] = useState<{
-    width: number
-    height: number
-  } | null>(null)
 
   // Create or use provided video element
   const videoElement = useMemo(() => {
@@ -60,54 +73,20 @@ export function VideoXR(allProps: VideoXRProperties) {
     if (typeof src === 'string') {
       video.src = src
     }
-    return video
-  }, [src])
-
-  // Apply video properties
-  useEffect(() => {
-    if (!videoElement) return
-
-    videoElement.volume = volume
-    videoElement.muted = muted
-    videoElement.loop = loop
-    videoElement.autoplay = autoplay
+    video.volume = volume
+    video.muted = muted
+    video.loop = loop
+    video.autoplay = autoplay
     if (crossOrigin !== null) {
-      videoElement.crossOrigin = crossOrigin
+      video.crossOrigin = crossOrigin
     }
-    videoElement.preservesPitch = preservesPitch
-    videoElement.playbackRate = playbackRate
-  }, [videoElement, volume, muted, loop, autoplay, crossOrigin, preservesPitch, playbackRate])
+    video.preservesPitch = preservesPitch
+    video.playbackRate = playbackRate
+    return video
+  }, [src, volume, muted, loop, autoplay, crossOrigin, preservesPitch, playbackRate])
 
-  // Handle metadata loading to get video dimensions
-  useEffect(() => {
-    if (!videoElement) return
-
-    const handleLoadedMetadata = () => {
-      if (videoElement.videoWidth && videoElement.videoHeight) {
-        setVideoDimensions({
-          width: videoElement.videoWidth,
-          height: videoElement.videoHeight
-        })
-        debug('VideoXR: Video dimensions loaded', {
-          width: videoElement.videoWidth,
-          height: videoElement.videoHeight
-        })
-      }
-    }
-
-    // Add event listener
-    videoElement.addEventListener('loadedmetadata', handleLoadedMetadata)
-
-    // Check if metadata is already loaded
-    if (videoElement.readyState >= HTMLMediaElement.HAVE_METADATA) {
-      handleLoadedMetadata()
-    }
-
-    // Cleanup
-    return () => {
-      videoElement.removeEventListener('loadedmetadata', handleLoadedMetadata)
-    }
-  }, [videoElement])
+  // Wait for video metadata to get dimensions
+  const videoDimensions = useVideoMetadata(videoElement)
 
   // Calculate aspect ratio from video dimensions
   const aspectRatio = videoDimensions
@@ -130,6 +109,7 @@ export function VideoXR(allProps: VideoXRProperties) {
             pixelWidth={videoDimensions.width}
             pixelHeight={videoDimensions.height}
             scale={[1, 1, 1]}
+            renderOrder={renderOrder}
           />
         ) : (
           // Placeholder while loading - could show a loading indicator here

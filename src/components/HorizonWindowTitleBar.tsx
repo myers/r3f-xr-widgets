@@ -1,6 +1,6 @@
 import { Container, Text } from '@react-three/uikit'
 import { XIcon } from '@react-three/uikit-lucide'
-import montserratFontData from '../assets/fonts/Montserrat-font'
+import { montserrat } from '@pmndrs/msdfonts'
 
 /**
  * Props for the HorizonWindowTitleBar component
@@ -18,31 +18,34 @@ export interface HorizonWindowTitleBarProps {
 export function HorizonWindowTitleBar(props: HorizonWindowTitleBarProps) {
   const { title, onClose } = props
   return (
-    <Container flexDirection="row" alignItems="center" gap={16} flexGrow={1}>
+    <Container flexDirection="row" alignItems="center" gap={16} flexGrow={1} >
       {title && (
-        <Text fontSize={24} color="white" fontFamily="montserrat" fontFamilies={{ montserrat: { normal: montserratFontData } }}>
+        <Text fontSize={24} color="white" fontFamily="montserrat" fontFamilies={{ montserrat }}>
           {title}
         </Text>
-      )}
+      )
+      }
       <Container flexGrow={1} />
-      {onClose && (
-        <Container
-          width={40}
-          height={40}
-          onClick={(e) => {
-            e.stopPropagation?.()
-            onClose()
-          }}
-          onPointerDown={(e) => {
-            e.stopPropagation?.()
-          }}
-          cursor="pointer"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <XIcon width={24} height={24} color="white" />
-        </Container>
-      )}
-    </Container>
+      {
+        onClose && (
+          <Container
+            width={40}
+            height={40}
+            onClick={(e) => {
+              e.stopPropagation?.()
+              onClose()
+            }}
+            onPointerDown={(e) => {
+              e.stopPropagation?.()
+            }}
+            cursor="pointer"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <XIcon width={24} height={24} color="white" />
+          </Container>
+        )
+      }
+    </Container >
   )
 }

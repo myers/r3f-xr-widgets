@@ -25,6 +25,9 @@ export interface QuadVideoPlayerProps extends Omit<ContainerProperties, 'childre
   /** Aspect ratio (width/height) of the video display. @default 16/9 */
   aspectRatio?: number
 
+  /** XRLayer layout mode for stereo videos. @default 'default' */
+  layout?: 'default' | 'mono' | 'stereo-left-right' | 'stereo-top-bottom'
+
   /** Whether to show the control panel. @default true */
   showControls?: boolean
 
@@ -45,10 +48,13 @@ export interface QuadVideoPlayerProps extends Omit<ContainerProperties, 'childre
   }
 
   /** Whether XR controller buttons require pointer to be on the video. @default true */
-  xrRequirePointer?: boolean
+  requirePointerOnTarget?: boolean
 
   /** Callback fired when XR controller playback actions occur (play/pause/seek/toggle). */
   onPlaybackAction?: (action: PlaybackAction) => void
+
+  /** Render order for XRLayer compositing. Higher values render on top. @default 0 */
+  layerRenderOrder?: number
 }
 
 /**
@@ -116,6 +122,7 @@ export function QuadVideoPlayer(allProps: QuadVideoPlayerProps) {
     video,
     renderer = 'xrlayer',
     aspectRatio = 16 / 9,
+    layout = 'default',
     showControls = true,
     showActionIndicator = true,
     enableXRControllers = true,
@@ -125,14 +132,15 @@ export function QuadVideoPlayer(allProps: QuadVideoPlayerProps) {
       left: '16%' as `${number}%`,
       right: '16%' as `${number}%`
     },
-    xrRequirePointer = true,
+    requirePointerOnTarget = true,
     onPlaybackAction,
+    layerRenderOrder = 0,
     ...containerProps
   } = allProps
   // Use XR controller hook for controller input (conditionally)
   const xrControls = enableXRControllers ? useVideoXRControls({
     video,
-    requirePointerOnTarget: xrRequirePointer,
+    requirePointerOnTarget,
     onAction: onPlaybackAction
   }) : null
 
@@ -171,8 +179,10 @@ export function QuadVideoPlayer(allProps: QuadVideoPlayerProps) {
           src={video}
           width="100%"
           aspectRatio={aspectRatio}
+          layout={layout}
           controls={false}
           onClick={handleVideoClick}
+          renderOrder={layerRenderOrder}
         />
 
         {/* Action Indicator - centered over video for visual feedback */}
@@ -284,6 +294,7 @@ export function QuadVideoPlayer(allProps: QuadVideoPlayerProps) {
               pixelWidth={960}
               pixelHeight={540}
               scale={[1, 1, 1]}
+              renderOrder={layerRenderOrder}
             />
           </Content>
         </Container>

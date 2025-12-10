@@ -31,24 +31,6 @@ These demos use WebXR and are best experienced with a VR headset (Meta Quest, et
       📁 View Source
     </a>
   </div>
-
-  <div v-if="demo.keyFeatures.length > 0" class="features">
-    <strong>Features:</strong>
-    <ul>
-      <li v-for="feature in demo.keyFeatures" :key="feature">{{ feature }}</li>
-    </ul>
-  </div>
-
-  <div v-if="demo.dependencies.length > 0" class="dependencies">
-    <details>
-      <summary>Key Dependencies</summary>
-      <ul>
-        <li v-for="dep in demo.dependencies" :key="dep">
-          <code>{{ dep }}</code>
-        </li>
-      </ul>
-    </details>
-  </div>
 </div>
 
 </div>
@@ -100,6 +82,7 @@ pnpm demo:resizable-window
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+  color: black;
 }
 
 .demo-link, .source-link {
@@ -113,7 +96,7 @@ pnpm demo:resizable-window
 
 .demo-link {
   background: var(--vp-c-brand-1);
-  color: white;
+  color: black;
 }
 
 .demo-link:hover {

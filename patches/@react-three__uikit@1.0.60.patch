@@ -1,0 +1,103 @@
+diff --git a/dist/build.d.ts b/dist/build.d.ts
+index e24306e992779599efbbdf1bc5903178f381e032..878fb0d4ac21b2133f532badab972d68cf45a3cd 100644
+--- a/dist/build.d.ts
++++ b/dist/build.d.ts
+@@ -5,9 +5,15 @@ declare module 'three' {
+         __r3f?: Instance;
+     }
+ }
++export interface UIKitObject3DProps {
++    /** Name for the underlying Object3D (useful for debugging and scene traversal) */
++    object3DName?: string;
++    /** Custom user data attached to the underlying Object3D */
++    userData?: Record<string, any>;
++}
+ export declare function build<T extends Component, P>(Component: {
+     new (): T;
+-}, name?: string): import("react").ForwardRefExoticComponent<import("react").PropsWithoutRef<P> & import("react").RefAttributes<T>>;
++}, name?: string): import("react").ForwardRefExoticComponent<import("react").PropsWithoutRef<P & UIKitObject3DProps> & import("react").RefAttributes<T>>;
+ export declare function useRenderContext(): RenderContext;
+ /**
+  * @returns the props that should be applied to the component
+diff --git a/dist/build.js b/dist/build.js
+index 07c945a190851415c7090ce65b5705499c7c4fde..512f18c2ab6437c8b2dba033b255ada7c1dd477d 100644
+--- a/dist/build.js
++++ b/dist/build.js
+@@ -12,7 +12,7 @@ export function build(Component, name = Component.name) {
+         const renderContext = useRenderContext();
+         const args = useMemo(() => [undefined, undefined, { renderContext }], [renderContext]);
+         const outProps = useSetup(ref, props, args);
+-        return jsx(`vanilla${name}`, { ref, children, ...outProps });
++        return jsx(`vanilla${name}`, { ref, children, ...outProps, name: props.object3DName, userData: props.userData });
+     });
+ }
+ export function useRenderContext() {
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 654e0b9ad1e1ab4ab555abfc70cd3e867348f25b..9d105f05a94ec3c6ac2ff1f6568f48c4299e4776 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -54,7 +54,7 @@ export declare const Container: import("react").ForwardRefExoticComponent<import
+     '*'?: import("@pmndrs/uikit").WithConditionalsAndImportant<import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").BaseOutProperties>>>>> | undefined;
+ } & {
+     children?: ReactNode;
+-} & ClassListProperties & import("react").RefAttributes<VanillaContainer<import("@pmndrs/uikit").BaseOutProperties>>>;
++} & ClassListProperties & import("./build.js").UIKitObject3DProps & import("react").RefAttributes<VanillaContainer<import("@pmndrs/uikit").BaseOutProperties>>>;
+ export declare const Content: import("react").ForwardRefExoticComponent<import("@pmndrs/uikit").GetAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").ContentOutProperties>>>, import("@pmndrs/uikit").AllAliases> & import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").ContentOutProperties>>> & {
+     hover?: import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").ContentOutProperties>>>> | undefined;
+ } & {
+@@ -77,7 +77,7 @@ export declare const Content: import("react").ForwardRefExoticComponent<import("
+     '*'?: import("@pmndrs/uikit").WithConditionalsAndImportant<import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").ContentOutProperties>>>>> | undefined;
+ } & {
+     children?: ReactNode;
+-} & ClassListProperties & import("react").RefAttributes<VanillaContent<import("@pmndrs/uikit").ContentOutProperties>>>;
++} & ClassListProperties & import("./build.js").UIKitObject3DProps & import("react").RefAttributes<VanillaContent<import("@pmndrs/uikit").ContentOutProperties>>>;
+ export declare const Custom: import("react").ForwardRefExoticComponent<import("@pmndrs/uikit").GetAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").BaseOutProperties>>>, import("@pmndrs/uikit").AllAliases> & import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").BaseOutProperties>>> & {
+     hover?: import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").BaseOutProperties>>>> | undefined;
+ } & {
+@@ -100,7 +100,7 @@ export declare const Custom: import("react").ForwardRefExoticComponent<import("@
+     '*'?: import("@pmndrs/uikit").WithConditionalsAndImportant<import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").BaseOutProperties>>>>> | undefined;
+ } & {
+     children?: ReactNode;
+-} & ClassListProperties & import("react").RefAttributes<VanillaCustom<import("@pmndrs/uikit").BaseOutProperties>>>;
++} & ClassListProperties & import("./build.js").UIKitObject3DProps & import("react").RefAttributes<VanillaCustom<import("@pmndrs/uikit").BaseOutProperties>>>;
+ export declare const Image: import("react").ForwardRefExoticComponent<import("@pmndrs/uikit").GetAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").ImageOutProperties<string | import("three").Texture>>>>, import("@pmndrs/uikit").AllAliases> & import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").ImageOutProperties<string | import("three").Texture>>>> & {
+     hover?: import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").ImageOutProperties<string | import("three").Texture>>>>> | undefined;
+ } & {
+@@ -121,7 +121,7 @@ export declare const Image: import("react").ForwardRefExoticComponent<import("@p
+     placeholderStyle?: import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").ImageOutProperties<string | import("three").Texture>>>>> | undefined;
+ } & {
+     '*'?: import("@pmndrs/uikit").WithConditionalsAndImportant<import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").ImageOutProperties<string | import("three").Texture>>>>>> | undefined;
+-} & ClassListProperties & import("react").RefAttributes<VanillaImage<import("@pmndrs/uikit").ImageOutProperties<string | import("three").Texture>>>>;
++} & ClassListProperties & import("./build.js").UIKitObject3DProps & import("react").RefAttributes<VanillaImage<import("@pmndrs/uikit").ImageOutProperties<string | import("three").Texture>>>>;
+ export declare const Video: import("react").ForwardRefExoticComponent<import("@pmndrs/uikit").GetAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").VideoOutProperties>>>, import("@pmndrs/uikit").AllAliases> & import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").VideoOutProperties>>> & {
+     hover?: import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").VideoOutProperties>>>> | undefined;
+ } & {
+@@ -142,8 +142,8 @@ export declare const Video: import("react").ForwardRefExoticComponent<import("@p
+     placeholderStyle?: import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").VideoOutProperties>>>> | undefined;
+ } & {
+     '*'?: import("@pmndrs/uikit").WithConditionalsAndImportant<import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").VideoOutProperties>>>>> | undefined;
+-} & ClassListProperties & import("react").RefAttributes<VanillaVideo<import("@pmndrs/uikit").VideoOutProperties>>>;
+-export declare const Input: import("react").ForwardRefExoticComponent<VanillaInputProperties & ClassListProperties & import("react").RefAttributes<VanillaInput<import("@pmndrs/uikit").InputOutProperties>>>;
++} & ClassListProperties & import("./build.js").UIKitObject3DProps & import("react").RefAttributes<VanillaVideo<import("@pmndrs/uikit").VideoOutProperties>>>;
++export declare const Input: import("react").ForwardRefExoticComponent<VanillaInputProperties & ClassListProperties & import("./build.js").UIKitObject3DProps & import("react").RefAttributes<VanillaInput<import("@pmndrs/uikit").InputOutProperties>>>;
+ export declare const Svg: import("react").ForwardRefExoticComponent<import("@pmndrs/uikit").GetAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").SvgOutProperties>>>, import("@pmndrs/uikit").AllAliases> & import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").SvgOutProperties>>> & {
+     hover?: import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").SvgOutProperties>>>> | undefined;
+ } & {
+@@ -164,7 +164,7 @@ export declare const Svg: import("react").ForwardRefExoticComponent<import("@pmn
+     placeholderStyle?: import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").SvgOutProperties>>>> | undefined;
+ } & {
+     '*'?: import("@pmndrs/uikit").WithConditionalsAndImportant<import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").SvgOutProperties>>>>> | undefined;
+-} & ClassListProperties & import("react").RefAttributes<VanillaSvg<import("@pmndrs/uikit").SvgOutProperties>>>;
++} & ClassListProperties & import("./build.js").UIKitObject3DProps & import("react").RefAttributes<VanillaSvg<import("@pmndrs/uikit").SvgOutProperties>>>;
+ export declare const Textarea: import("react").ForwardRefExoticComponent<import("@pmndrs/uikit").GetAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").InputOutProperties>>>, import("@pmndrs/uikit").AllAliases> & import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").InputOutProperties>>> & {
+     hover?: import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").InputOutProperties>>>> | undefined;
+ } & {
+@@ -185,7 +185,7 @@ export declare const Textarea: import("react").ForwardRefExoticComponent<import(
+     placeholderStyle?: import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").InputOutProperties>>>> | undefined;
+ } & {
+     '*'?: import("@pmndrs/uikit").WithConditionalsAndImportant<import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").InputOutProperties>>>>> | undefined;
+-} & ClassListProperties & import("react").RefAttributes<VanillaTextarea<import("@pmndrs/uikit").InputOutProperties>>>;
++} & ClassListProperties & import("./build.js").UIKitObject3DProps & import("react").RefAttributes<VanillaTextarea<import("@pmndrs/uikit").InputOutProperties>>>;
+ export declare const Fullscreen: import("react").ForwardRefExoticComponent<import("@pmndrs/uikit").GetAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").FullscreenOutProperties>>>, import("@pmndrs/uikit").AllAliases> & import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").FullscreenOutProperties>>> & {
+     hover?: import("@pmndrs/uikit").AddAllAliases<import("@pmndrs/uikit").WithSignal<import("@pmndrs/uikit").WithInitial<Partial<import("@pmndrs/uikit").FullscreenOutProperties>>>> | undefined;
+ } & {

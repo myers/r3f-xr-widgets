@@ -1,17 +1,21 @@
-import { describe, it, expect, afterEach } from 'vitest'
+import { describe, it, expect, afterEach, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { enterVRSession } from '../test-utils/vitest-helpers'
+import { enterVRSession, createTestXRStore } from '../test-utils/vitest-helpers'
 import { useState } from 'react'
+import type { XRStore } from '@react-three/xr'
 import { XRTestCanvas } from '../test-utils/xr-test-setup'
 import { useXRButtons } from './useXRButtons'
 import { Container, Text } from '@react-three/uikit'
 
 interface UseXRButtonsTestProps {
+  store: XRStore
   onButtonPress?: (button: string) => void
   requirePointerOn?: boolean
+  /** Position of target. Default [5, 1.5, -3] is away from controller. [0, 1.5, -3] is hit by default controller ray. */
+  targetPosition?: [number, number, number]
 }
 
-function UseXRButtonsTestMesh({ onButtonPress, requirePointerOn = true }: UseXRButtonsTestProps) {
+function UseXRButtonsTestMesh({ onButtonPress, requirePointerOn = true, targetPosition = [5, 1.5, -3] }: Omit<UseXRButtonsTestProps, 'store'>) {
   const [pressedButtons, setPressedButtons] = useState<string[]>([])
 
   const handleButtonPress = (buttonName: string) => {
@@ -40,7 +44,7 @@ function UseXRButtonsTestMesh({ onButtonPress, requirePointerOn = true }: UseXRB
   })
 
   return (
-    <group position={[0, 1.5, -3]} ref={targetRef}>
+    <group position={targetPosition} ref={targetRef} name="xr-buttons-test-target">
       <Container
         pixelSize={0.010}
         flexDirection="column"
@@ -49,8 +53,14 @@ function UseXRButtonsTestMesh({ onButtonPress, requirePointerOn = true }: UseXRB
         padding={32}
         backgroundColor="#1a1a1a"
         borderRadius={16}
-        onPointerEnter={onPointerEnter}
-        onPointerLeave={onPointerLeave}
+        onPointerEnter={() => {
+          onPointerEnter()
+          if (targetRef.current) targetRef.current.userData.pointerOn = true
+        }}
+        onPointerLeave={() => {
+          onPointerLeave()
+          if (targetRef.current) targetRef.current.userData.pointerOn = false
+        }}
       >
         <Text fontSize={32} fontWeight="bold" color="white">
           useXRButtons Test
@@ -75,7 +85,7 @@ function UseXRButtonsTestMesh({ onButtonPress, requirePointerOn = true }: UseXRB
   )
 }
 
-function UseXRButtonsTestScene(props: UseXRButtonsTestProps) {
+function UseXRButtonsTestScene({ store, ...props }: UseXRButtonsTestProps) {
   return (
     <>
       {/* Hidden tracker for test assertions */}
@@ -92,7 +102,7 @@ function UseXRButtonsTestScene(props: UseXRButtonsTestProps) {
         data-thumbstickright="0"
       />
 
-      <XRTestCanvas>
+      <XRTestCanvas store={store}>
         <UseXRButtonsTestMesh {...props} />
       </XRTestCanvas>
     </>
@@ -100,12 +110,21 @@ function UseXRButtonsTestScene(props: UseXRButtonsTestProps) {
 }
 
 describe('useXRButtons Hook', () => {
+  let store: XRStore
+
+  beforeEach(async () => {
+    // Clean up DOM
+    document.body.innerHTML = ''
+    // Create store and wait for iwer (outside React to avoid act() warnings)
+    store = await createTestXRStore()
+  })
+
   afterEach(async () => {
     // Clean up any existing session
     const canvas = document.querySelector('canvas')
-    const store = (canvas as any)?.__xrStore
-    if (store?.getState().session) {
-      await store.getState().session.end()
+    const canvasStore = (canvas as any)?.__xrStore
+    if (canvasStore?.getState().session) {
+      await canvasStore.getState().session.end()
     }
     // Clean up DOM
     document.body.innerHTML = ''
@@ -114,7 +133,7 @@ describe('useXRButtons Hook', () => {
   describe('Button Presses', () => {
     it('should detect A button press (right controller)', async () => {
       // Render component
-      render(<UseXRButtonsTestScene requirePointerOn={false} />)
+      render(<UseXRButtonsTestScene store={store} requirePointerOn={false} />)
 
       // Enter VR session and get controllers
       const { controllers } = await enterVRSession({ container: document.body, timeout: 10000 })
@@ -129,7 +148,7 @@ describe('useXRButtons Hook', () => {
 
     it('should detect B button press (right controller)', async () => {
       // Render component
-      render(<UseXRButtonsTestScene requirePointerOn={false} />)
+      render(<UseXRButtonsTestScene store={store} requirePointerOn={false} />)
 
       // Enter VR session and get controllers
       const { controllers } = await enterVRSession({ container: document.body, timeout: 10000 })
@@ -144,7 +163,7 @@ describe('useXRButtons Hook', () => {
 
     it('should detect X button press (left controller)', async () => {
       // Render component
-      render(<UseXRButtonsTestScene requirePointerOn={false} />)
+      render(<UseXRButtonsTestScene store={store} requirePointerOn={false} />)
 
       // Enter VR session and get controllers
       const { controllers } = await enterVRSession({ container: document.body, timeout: 10000 })
@@ -159,7 +178,7 @@ describe('useXRButtons Hook', () => {
 
     it('should detect Y button press (left controller)', async () => {
       // Render component
-      render(<UseXRButtonsTestScene requirePointerOn={false} />)
+      render(<UseXRButtonsTestScene store={store} requirePointerOn={false} />)
 
       // Enter VR session and get controllers
       const { controllers } = await enterVRSession({ container: document.body, timeout: 10000 })
@@ -176,7 +195,7 @@ describe('useXRButtons Hook', () => {
   describe('Thumbstick Movement', () => {
     it('should detect thumbstick up', async () => {
       // Render component
-      render(<UseXRButtonsTestScene requirePointerOn={false} />)
+      render(<UseXRButtonsTestScene store={store} requirePointerOn={false} />)
 
       // Enter VR session and get controllers
       const { controllers } = await enterVRSession({ container: document.body, timeout: 10000 })
@@ -191,7 +210,7 @@ describe('useXRButtons Hook', () => {
 
     it('should detect thumbstick down', async () => {
       // Render component
-      render(<UseXRButtonsTestScene requirePointerOn={false} />)
+      render(<UseXRButtonsTestScene store={store} requirePointerOn={false} />)
 
       // Enter VR session and get controllers
       const { controllers } = await enterVRSession({ container: document.body, timeout: 10000 })
@@ -206,7 +225,7 @@ describe('useXRButtons Hook', () => {
 
     it('should detect thumbstick left', async () => {
       // Render component
-      render(<UseXRButtonsTestScene requirePointerOn={false} />)
+      render(<UseXRButtonsTestScene store={store} requirePointerOn={false} />)
 
       // Enter VR session and get controllers
       const { controllers } = await enterVRSession({ container: document.body, timeout: 10000 })
@@ -221,7 +240,7 @@ describe('useXRButtons Hook', () => {
 
     it('should detect thumbstick right', async () => {
       // Render component
-      render(<UseXRButtonsTestScene requirePointerOn={false} />)
+      render(<UseXRButtonsTestScene store={store} requirePointerOn={false} />)
 
       // Enter VR session and get controllers
       const { controllers } = await enterVRSession({ container: document.body, timeout: 10000 })
@@ -237,45 +256,36 @@ describe('useXRButtons Hook', () => {
 
   describe('Pointer Awareness', () => {
     it('should require pointer when requirePointerOn is true', async () => {
-      // Render component with pointer requirement
-      render(<UseXRButtonsTestScene requirePointerOn={true} />)
+      // Render with target at default position (away from controller)
+      render(<UseXRButtonsTestScene store={store} requirePointerOn={true} />)
 
       const tracker = document.getElementById('button-tracker')
       expect(tracker).toBeDefined()
 
       const { controllers, scene } = await enterVRSession({ container: document.body, timeout: 10000 })
 
-      // Point controller straight down so it's NOT pointing at target (away from target at (0, 1.5, -3))
+      // Enable hideUI to disable DevUI's syncDeviceTransforms()
+      // Note: The property is 'devui' (lowercase), not 'devUI' (camelCase)
       const emulator = controllers['store'].getState().emulator
-      const controller = emulator?.controllers.right
-      if (controller) {
-        // Point straight down (90 degrees around X axis) - quaternion for X-axis rotation
-        // Quaternion for 90° rotation around X: (sin(45°), 0, 0, cos(45°)) = (0.707, 0, 0, 0.707)
-        controller.quaternion.x = 0.707
-        controller.quaternion.y = 0
-        controller.quaternion.z = 0
-        controller.quaternion.w = 0.707
-      }
-      await controllers.waitFrames(2)
-
-      // Press A button WITHOUT pointing at target
-      await controllers.pressButton('a-button', 'right', 3)
-
-      // Wait a bit to ensure no trigger
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      // Verify A button was NOT pressed (because pointer not on target)
-      expect(tracker!.dataset.a, 'A button should NOT be pressed without pointer').toBe('0')
-
-      // Now point at target - find the group (positioned at [0, 1.5, -3])
-      const targetGroup = scene.children.find(child =>
-        child.type === 'Group' && child.position.y === 1.5
-      )
-      if (!targetGroup) {
-        throw new Error('Target group not found in scene')
+      if (emulator?.devui) {
+        emulator.devui.hideUI = true
+        expect(emulator.devui.hideUI, '@iwer/devui patch not applied - run pnpm install --force').toBe(true)
       }
 
-      await controllers.point(targetGroup)
+      // Find target by name - it's at (5, 1.5, -3), default controller ray does NOT hit it
+      const target = scene.getObjectByName('xr-buttons-test-target')
+      expect(target, 'Target not found in scene').toBeDefined()
+
+      // Verify pointer is initially OFF target
+      expect(target?.userData.pointerOn, 'Pointer should initially be off target').not.toBe(true)
+
+      // Point at target dynamically
+      await controllers.point({ name: 'xr-buttons-test-target' })
+
+      // Poll until pointer is confirmed ON target
+      await expect.poll(() => target?.userData.pointerOn, { timeout: 3000 }).toBe(true)
+
+      // Press A button - should work because pointer is on target
       await controllers.pressButton('a-button', 'right', 3)
 
       // Verify A button WAS pressed with pointer on target
@@ -284,29 +294,30 @@ describe('useXRButtons Hook', () => {
 
     it('should not fire when pointer is not on target (requirePointerOn=true)', async () => {
       // This test validates that the hook DOES respect requirePointerOn
-      render(<UseXRButtonsTestScene requirePointerOn={true} />)
+      render(<UseXRButtonsTestScene store={store} requirePointerOn={true} />)
 
       const tracker = document.getElementById('button-tracker')
       expect(tracker).toBeDefined()
 
-      const { controllers } = await enterVRSession({ container: document.body, timeout: 10000 })
+      const { controllers, scene } = await enterVRSession({ container: document.body, timeout: 10000 })
 
-      // Move controller to the side so it's NOT pointing at target
+      // Enable hideUI to disable DevUI's syncDeviceTransforms()
+      // Note: The property is 'devui' (lowercase), not 'devUI' (camelCase)
       const emulator = controllers['store'].getState().emulator
-      const controller = emulator?.controllers.right
-      if (controller) {
-        controller.position.set(2, 1.5, -2)
-        // Point right (away from target at (0, 1.5, -3))
-        controller.quaternion.y = 0.707
-        controller.quaternion.w = 0.707
+      if (emulator?.devui) {
+        emulator.devui.hideUI = true
+        expect(emulator.devui.hideUI, '@iwer/devui patch not applied - run pnpm install').toBe(true)
       }
-      await controllers.waitFrames(2)
+
+      // Find target by name - it's at x=5, far from default controller ray
+      const target = scene.getObjectByName('xr-buttons-test-target')
+      expect(target, 'Target not found in scene').toBeDefined()
+
+      // Pointer should NOT be on target (target at x=5, controller ray along -Z)
+      expect(target?.userData.pointerOn, 'Pointer should not be on target').not.toBe(true)
 
       // Press A button while NOT pointing at target
       await controllers.pressButton('a-button', 'right', 3)
-
-      // Wait to ensure no trigger
-      await new Promise(resolve => setTimeout(resolve, 500))
 
       // Verify button was NOT pressed (because pointer not on target)
       expect(tracker!.dataset.a, 'Button should NOT fire when pointer is off target').toBe('0')
@@ -314,27 +325,24 @@ describe('useXRButtons Hook', () => {
 
     it('should fire regardless of pointer when requirePointerOn is false', async () => {
       // Render component without pointer requirement
-      render(<UseXRButtonsTestScene requirePointerOn={false} />)
+      render(<UseXRButtonsTestScene store={store} requirePointerOn={false} />)
 
       const tracker = document.getElementById('button-tracker')
       expect(tracker).toBeDefined()
 
-      const { controllers } = await enterVRSession({ container: document.body, timeout: 10000 })
+      const { controllers, scene } = await enterVRSession({ container: document.body, timeout: 10000 })
 
-      // Move controller away from target (same position as above test)
-      const emulator = controllers['store'].getState().emulator
-      const controller = emulator?.controllers.right
-      if (controller) {
-        controller.position.set(2, 1.5, -2)
-        controller.quaternion.y = 0.707
-        controller.quaternion.w = 0.707
-      }
-      await controllers.waitFrames(2)
+      // Find target - it's at x=5, so pointer is NOT on target by default
+      const target = scene.getObjectByName('xr-buttons-test-target')
+      expect(target, 'Target not found in scene').toBeDefined()
+
+      // Pointer is NOT on target (target at x=5, controller ray along -Z)
+      expect(target?.userData.pointerOn, 'Pointer should not be on target').not.toBe(true)
 
       // Press A button while NOT pointing at target
       await controllers.pressButton('a-button', 'right', 3)
 
-      // Verify A button WAS pressed (even without pointer on target)
+      // Verify A button WAS pressed (even without pointer on target, because requirePointerOn=false)
       await expect.poll(() => tracker?.dataset.a, { timeout: 3000 }).toBe('1')
     })
   })

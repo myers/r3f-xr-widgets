@@ -1,29 +1,27 @@
 import { Canvas } from '@react-three/fiber'
-import { Environment, Billboard } from '@react-three/drei'
+import { Environment } from '@react-three/drei'
 import { XR, createXRStore, PointerEvents, noEvents } from '@react-three/xr'
 import { ResizableWindow, AudioEffects, SplashScreen, GitHubBadge } from '../../../src/index'
 import { useState } from 'react'
 import { Container, Text } from '@react-three/uikit'
 
-const store = createXRStore({ emulate: { syntheticEnvironment: false } })
+const store = createXRStore({ emulate: { syntheticEnvironment: true } })
 
 // Default eye level for camera (in meters)
 const DEFAULT_EYE_LEVEL = 1.5
 
 function WindowDemo() {
   return (
-    <Billboard>
-      <ResizableWindow
-        position={[0, 1.5, -1]}
-        handleColor="#ff9999"
-        autoRotateToCamera={false}
-        initiallyRotateTowardsCamera={true}
-        aspectRatio={16/9}
-        baseScale={0.3}
-      >
-        <DemoContent aspectRatio={16/9} baseScale={0.3} />
-      </ResizableWindow>
-    </Billboard>
+    <ResizableWindow
+      position={[0, 1.5, -1]}
+      handleColor="#ff9999"
+      autoRotateToCamera={true}
+      initiallyRotateTowardsCamera={true}
+      aspectRatio={16/9}
+      baseScale={0.3}
+    >
+      <DemoContent aspectRatio={16/9} baseScale={0.3} />
+    </ResizableWindow>
   )
 }
 

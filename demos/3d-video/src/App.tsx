@@ -30,7 +30,6 @@ export function App() {
     "https://d25a56pc18k0co.cloudfront.net/sloths_binaural_3840_180_3D-injected.mp4"
   // const videoUrl = 'MaryOculus.mp4'
 
-  console.log("App")
   return (
     <>
       <SplashScreen store={store} modes={['immersive-vr']}>

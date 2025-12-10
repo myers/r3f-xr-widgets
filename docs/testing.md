@@ -1,10 +1,11 @@
 # XR Testing Guide
 
-This guide covers how to write automated tests for React-XR components using Vitest Browser Mode.
+This guide covers how to write automated tests for React-XR components using Vitest's multi-project setup with both unit tests (jsdom) and browser tests (XR emulation).
 
 ## Table of Contents
 
 - [Introduction](#introduction)
+- [Test Architecture](#test-architecture)
 - [Quick Start](#quick-start)
 - [Core Components & APIs](#core-components--apis)
 - [Writing Your First Test](#writing-your-first-test)
@@ -30,6 +31,76 @@ The framework is built on:
 - **vitest-browser-react** - React rendering utilities for browser tests
 - **@react-three/xr** - XR primitives with emulator support (IWER)
 - **Custom test utilities** - ControllerHelper, XRTestCanvas, enterVRSession
+
+---
+
+## Test Architecture
+
+This library uses a multi-project test setup optimized for both speed and comprehensive coverage:
+
+### Unit Tests (Fast)
+
+**File naming:** `*.test.tsx`
+**Environment:** Node.js + jsdom
+**Speed:** ~259ms for 17 tests
+**Use for:** UIKit components, non-XR hooks, pure React logic
+
+Unit tests run in Node with jsdom providing browser APIs (DOMParser, document, etc.) without the overhead of launching a real browser. These tests use `@react-three/test-renderer` for headless Three.js rendering.
+
+**Example:** Testing a ControlPanel component
+
+```typescript
+// src/components/ControlPanel.test.tsx
+import { describe, it, expect } from 'vitest'
+import { renderUIKit } from '../test-utils'
+import { ControlPanel } from './ControlPanel'
+
+it('should render control panel with all buttons', async () => {
+  const mockVideo = createMockVideo()
+  const renderer = await renderUIKit(
+    <ControlPanel video={mockVideo} name="test" />
+  )
+
+  const playButton = renderer.scene.find(node =>
+    node.instance.name === 'test-play-pause'
+  )
+  expect(playButton).toBeDefined()
+})
+```
+
+### Browser Tests (Full XR Emulation)
+
+**File naming:** `*.browser.test.tsx`
+**Environment:** Real browser (Chromium) with WebGL
+**Speed:** ~30s for 34 tests
+**Use for:** XR interactions, controller input, full integration tests
+
+Browser tests run in a real Chromium instance with full XR emulation via IWER. These provide complete XR session simulation with virtual controllers.
+
+**Example:** Testing XR button presses
+
+```typescript
+// src/hooks/useXRButtons.browser.test.tsx
+import { describe, it, expect } from 'vitest'
+import { render } from 'vitest-browser-react'
+import { enterVRSession } from '../test-utils/vitest-helpers'
+
+it('should detect A button press', async () => {
+  render(<UseXRButtonsTestScene />)
+  const { controllers } = await enterVRSession({ container: document.body })
+
+  await controllers.pressButton('a-button', 'right', 3)
+
+  // Assert event fired
+  const tracker = document.getElementById('button-tracker')
+  await expect.poll(() => tracker?.dataset.a).toBe('1')
+})
+```
+
+### When to Use Which
+
+- **Unit tests:** Start here for component logic, event handlers, state management
+- **Browser tests:** Required for XR-specific features, controller interactions, WebGL rendering
 
 ---
 
@@ -342,7 +413,7 @@ Helper function to find a named object in the Three.js scene hierarchy.
 function findObjectInScene(
   scene: THREE.Scene,
   name: string
-): THREE.Object3D | undefined
+): THREE.Object3D | null
 ```
 
 **Usage:**
@@ -364,7 +435,7 @@ await expect.poll(
 
 - Traverses the scene hierarchy
 - Searches for an object with matching `name` property
-- Returns the first matching object or `undefined`
+- Returns the first matching object or `null`
 - Used internally by `ControllerHelper.clickAt()` and `ControllerHelper.point()`
 
 ---
@@ -678,6 +749,18 @@ Run all tests in headless mode:
 
 ```bash
 pnpm test
+```
+
+Run unit tests only (fast, jsdom):
+
+```bash
+pnpm test:node
+```
+
+Run browser tests only (XR emulation):
+
+```bash
+pnpm test:browser
 ```
 
 Run tests with Vitest UI for debugging:

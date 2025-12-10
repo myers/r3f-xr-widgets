@@ -1,11 +1,19 @@
 import { Container, Text } from "@react-three/uikit"
-// import { Button } from "@react-three/uikit-default"
 import { VideoSlider } from "./VideoSlider"
 import { VolumeControl } from "./VolumeControl"
 import { useMemo, useState, useEffect } from "react"
-import { computed, signal } from "@preact/signals-core"
+import { computed, signal, Signal } from "@preact/signals-core"
 import { useFrame } from "@react-three/fiber"
 import { Play, Pause, FastForward, Rewind } from "@react-three/uikit-lucide"
+
+// Constants
+const SEEK_SECONDS = 10
+const ICON_SIZE_SMALL = 24
+const ICON_SIZE_LARGE = 48
+const FONT_SIZE_SMALL = 14
+const FONT_SIZE_TITLE = 16
+const CARD_HEIGHT_WITH_TITLE = 110
+const CARD_HEIGHT_WITHOUT_TITLE = 84
 
 /**
  * Props for the ControlPanel component
@@ -14,6 +22,7 @@ import { Play, Pause, FastForward, Rewind } from "@react-three/uikit-lucide"
 export type ControlPanelProps = {
   video?: HTMLVideoElement
   title?: string
+  object3DName?: string
 }
 
 /**
@@ -21,10 +30,11 @@ export type ControlPanelProps = {
  * @group Types
  */
 export type ControlPanelCardProps = ControlPanelProps & {
-  opacity?: any // Signal or number for opacity
+  opacity?: number | Signal<number>
 }
 
 function formatDuration(seconds: number) {
+  if (!isFinite(seconds)) return "0:00"
   const hour = Math.floor(seconds / 3600)
   const min = Math.floor((seconds / 60) % 60)
   const sec = Math.floor(seconds % 60)
@@ -36,7 +46,7 @@ function formatDuration(seconds: number) {
  * @group Components
  */
 export const ControlPanel = (props: ControlPanelProps) => {
-  const { video, title } = props
+  const { video, title, object3DName = 'control-panel' } = props
   const timeSignal = useMemo(() => signal(0), [])
   const durationSignal = useMemo(() => signal(0), [])
   const [paused, setPaused] = useState(true)
@@ -77,7 +87,7 @@ export const ControlPanel = (props: ControlPanelProps) => {
     [durationSignal],
   )
 
-  const handlePlayPause = (e?: any) => {
+  const handlePlayPause = (e?: { stopPropagation?: () => void }) => {
     e?.stopPropagation?.()
     if (!video) return
     if (video.paused) {
@@ -87,16 +97,16 @@ export const ControlPanel = (props: ControlPanelProps) => {
     }
   }
 
-  const handleRewind = (e?: any) => {
+  const handleRewind = (e?: { stopPropagation?: () => void }) => {
     e?.stopPropagation?.()
     if (!video) return
-    video.currentTime = Math.max(0, video.currentTime - 10)
+    video.currentTime = Math.max(0, video.currentTime - SEEK_SECONDS)
   }
 
-  const handleFastForward = (e?: any) => {
+  const handleFastForward = (e?: { stopPropagation?: () => void }) => {
     e?.stopPropagation?.()
     if (!video) return
-    video.currentTime = Math.min(video.duration, video.currentTime + 10)
+    video.currentTime = Math.min(video.duration, video.currentTime + SEEK_SECONDS)
   }
 
   return (
@@ -107,9 +117,11 @@ export const ControlPanel = (props: ControlPanelProps) => {
       margin={15}
     >
       {title && (
-        <Text fontSize={16} color="white" textAlign="left" fontWeight="bold">
-          {title}
-        </Text>
+        <Container object3DName={`${object3DName}-title`}>
+          <Text fontSize={FONT_SIZE_TITLE} color="white" textAlign="left" fontWeight="bold">
+            {title}
+          </Text>
+        </Container>
       )}
       <Container
         flexDirection="row"
@@ -130,41 +142,42 @@ export const ControlPanel = (props: ControlPanelProps) => {
           width="33%"
           justifyContent="center"
         >
-          <Container cursor="pointer" onClick={handleRewind} padding={8}>
+          <Container cursor="pointer" onClick={handleRewind} padding={8} object3DName={`${object3DName}-rewind`}>
             <Rewind
               color="white"
-              width={24}
-              height={24}
+              width={ICON_SIZE_SMALL}
+              height={ICON_SIZE_SMALL}
             />
           </Container>
           <Container
             cursor="pointer"
             onClick={handlePlayPause}
             padding={8}
+            object3DName={`${object3DName}-play-pause`}
           >
-            {(() => {
-              const PlayPauseIcon = paused ? Play : Pause
-              return <PlayPauseIcon color="white" width={48} height={48} />
-            })()}
+            {paused
+              ? <Play color="white" width={ICON_SIZE_LARGE} height={ICON_SIZE_LARGE} />
+              : <Pause color="white" width={ICON_SIZE_LARGE} height={ICON_SIZE_LARGE} />
+            }
           </Container>
-          <Container cursor="pointer" onClick={handleFastForward} padding={8}>
+          <Container cursor="pointer" onClick={handleFastForward} padding={8} object3DName={`${object3DName}-fast-forward`}>
             <FastForward
               color="white"
-              width={24}
-              height={24}
+              width={ICON_SIZE_SMALL}
+              height={ICON_SIZE_SMALL}
             />
           </Container>
         </Container>
 
-        {/* Right section - Empty space */}
+        {/* Right section - Empty space to balance 3-column layout */}
         <Container width="33%" />
       </Container>
       <Container flexDirection="row" alignItems="center" gap={16}>
-        <Text fontSize={14} color="white" flexGrow={0} width={50}>
+        <Text fontSize={FONT_SIZE_SMALL} color="white" flexGrow={0} width={50}>
           {timeText}
         </Text>
         <VideoSlider media={video} flexGrow={1} />
-        <Text fontSize={14} color="white" flexGrow={0} width={50}>
+        <Text fontSize={FONT_SIZE_SMALL} color="white" flexGrow={0} width={50}>
           {durationText}
         </Text>
       </Container>
@@ -178,8 +191,7 @@ export const ControlPanel = (props: ControlPanelProps) => {
  */
 export const ControlPanelCard = (allProps: ControlPanelCardProps) => {
   const { opacity = 0.9, title, ...props } = allProps
-  // Dynamic height: 110px with title, 84px without (saves title row + gap)
-  const height = title ? 110 : 84
+  const height = title ? CARD_HEIGHT_WITH_TITLE : CARD_HEIGHT_WITHOUT_TITLE
 
   return (
     <Container

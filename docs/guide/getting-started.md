@@ -4,7 +4,7 @@ Welcome to **r3f-xr-widgets**! This guide will help you set up your first WebXR 
 
 ## What is r3f-xr-widgets?
 
-r3f-xr-widgets is a collection of production-ready React components and utilities for building WebXR (Virtual Reality and Augmented Reality) experiences using React Three Fiber.
+r3f-xr-widgets is a collection of React components and utilities for building WebXR (Virtual Reality and Augmented Reality) experiences using React Three Fiber.
 
 ### Key Features
 

@@ -14,6 +14,8 @@ export interface ControlPanelAutoFadeProps extends Omit<ContainerProperties, 'ch
   fadeDelay?: number
   alwaysVisible?: boolean
   toggleRef?: React.MutableRefObject<(() => void) | null>
+  /** Name for the Three.js object for scene queries */
+  object3DName?: string
 }
 
 /**
@@ -31,6 +33,7 @@ export function ControlPanelAutoFade(allProps: ControlPanelAutoFadeProps) {
     fadeDelay = 3000,
     alwaysVisible = false,
     toggleRef,
+    object3DName,
     ...containerProps
   } = allProps
   const [isPlaying, setIsPlaying] = useState(false)
@@ -127,7 +130,7 @@ export function ControlPanelAutoFade(allProps: ControlPanelAutoFadeProps) {
       onPointerLeave={() => setIsHovered(false)}
       {...containerProps}
     >
-      <ControlPanelCard video={video} title={title} opacity={animatedOpacity} />
+      <ControlPanelCard video={video} title={title} opacity={animatedOpacity} object3DName={object3DName} />
     </Container>
   )
 }

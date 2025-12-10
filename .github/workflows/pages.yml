@@ -40,7 +40,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build all demos and documentation
-        run: bash scripts/build-all-demos.sh
+        run: pnpm pages:build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

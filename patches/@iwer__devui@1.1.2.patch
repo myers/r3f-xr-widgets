@@ -1,0 +1,58 @@
+diff --git a/lib/index.d.ts b/lib/index.d.ts
+index 7fc0f2878c13133c5ba18dde9a24aa3fbc914d93..8c3607ef14c0f2a7233a4cb3bc7df41ed285742e 100644
+--- a/lib/index.d.ts
++++ b/lib/index.d.ts
+@@ -10,6 +10,7 @@ export declare class DevUI {
+     private inputLayer;
+     devUIContainer: HTMLDivElement;
+     readonly version = "1.1.1";
++    hideUI: boolean;
+     constructor(xrDevice: XRDevice);
+     render(time: number): void;
+     get devUICanvas(): HTMLCanvasElement;
+diff --git a/lib/index.js b/lib/index.js
+index 4658c0a5c4b7b3f4ebb1632798b3472620ff989f..c43ba746f34d297c71e2d2bc7eb2df3d1dd85430 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -56,6 +56,17 @@ export class DevUI {
+     get devUICanvas() {
+         return this.inputLayer.domElement;
+     }
++    set hideUI(enabled) {
++        this._hideUI = enabled;
++        // Hide UI containers
++        this.devUIContainer.style.display = enabled ? 'none' : '';
++        this.inputLayer.domElement.style.display = enabled ? 'none' : '';
++        // Disable sync in InputLayer
++        this.inputLayer.setHideUI(enabled);
++    }
++    get hideUI() {
++        return this._hideUI || false;
++    }
+ }
+ const Overlay = ({ xrDevice, inputLayer, shadowRoot, }) => {
+     const [pointerLocked, setPointerLocked] = useState(false);
+diff --git a/lib/scene.js b/lib/scene.js
+index 018ea87085697c5579d65f4a0fa7821ac060d202..58ba9b1168554760a5a8e38735d1a0302a270542 100644
+--- a/lib/scene.js
++++ b/lib/scene.js
+@@ -175,6 +175,9 @@ export class InputLayer {
+         });
+     }
+     syncDeviceTransforms() {
++        if (this._hideUI) {
++            return; // Skip sync when UI is hidden
++        }
+         const { xrDevice, cameraRig, transformHandles } = this;
+         xrDevice.position.copy(cameraRig.getWorldPosition(this.vec3));
+         xrDevice.quaternion.copy(cameraRig.getWorldQuaternion(this.quat));
+@@ -186,6 +189,9 @@ export class InputLayer {
+             emulatedInput.quaternion.copy(transformHandle.getWorldQuaternion(this.quat));
+         });
+     }
++    setHideUI(enabled) {
++        this._hideUI = enabled;
++    }
+     renderScene(time) {
+         const xrDeviceFOV = (this.xrDevice.fovy / Math.PI) * 180;
+         let cameraMatrixNeedsUpdate = false;

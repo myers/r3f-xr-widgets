@@ -1,8 +1,9 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import pkg from './package.json'
 
 export default defineConfig({
-  base: '/r3f-xr-widgets/windows/',
+  base: pkg.config.base,
   plugins: [
     react()
   ],
@@ -27,13 +28,15 @@ export default defineConfig({
       '@react-three/uikit-horizon',
       '@react-three/uikit-lucide',
       '@preact/signals-core',
+      '@pmndrs/pointer-events',
     ],
   },
   build: {
     sourcemap: true,
   },
   server: {
-    port: 9002,
+    port: pkg.config.port,
+    strictPort: true,
     sourcemapIgnoreList: () => false,
   },
 })

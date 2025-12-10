@@ -9,10 +9,13 @@ export { AudioEffects, HandleWithAudio } from './components/HandleWithAudio'
 export { Hover, type HoverProps } from './components/Hover'
 export { GitHubBadge, type GitHubBadgeProps } from './components/GitHubBadge'
 export { Skybox, type SkyboxProps } from './components/Skybox'
+export { XRLayerSkybox, type XRLayerSkyboxProps } from './components/XRLayerSkybox'
 export { GridFloor, type GridFloorProps } from './components/GridFloor'
 export { ArcMaterial } from './components/ArcMaterial'
 export { EdgeUVMaterial } from './components/EdgeUVMaterial'
 export { HorizonCursorMaterial } from './components/HorizonCursorMaterial'
+export { CylindricalBillboard, type CylindricalBillboardProps } from './components/CylindricalBillboard'
+export { DebugExpose, type DebugExposeProps } from './components/DebugExpose'
 
 // Video Player Components
 export { EquirectPlayer, type EquirectPlayerProps } from './components/EquirectPlayer'
@@ -25,18 +28,16 @@ export { IconFlash, type IconType, type IconFlashProps } from './components/Icon
 export { WaitingIcon } from './components/WaitingIcon'
 export { VideoXR, type VideoXRProperties } from './components/VideoXR'
 export { QuadVideoPlayer, type QuadVideoPlayerProps, type VideoRenderer } from './components/QuadVideoPlayer'
+export { BlackBorderXRLayer, type BlackBorderXRLayerProps } from './components/BlackBorderXRLayer'
 
 // Hooks
 export { useXRSessionModeSupportedPolling } from './hooks/useXRSessionModeSupportedPolling'
 export { useXRButtons, type UseXRButtonsOptions, type UseXRButtonsReturn } from './hooks/useXRButtons'
 export { useVideoXRControls, type UseVideoXRControlsOptions, type UseVideoXRControlsReturn, type PlaybackAction } from './hooks/useVideoXRControls'
+export { useVideoMetadata, type VideoDimensions } from './hooks/useVideoMetadata'
 
 // Utilities
 export { vibrateOnEvent, type PulseConfig } from './utils/vibrateOnEvent'
 
 // Assets
 export { default as cursorTextureUrl } from './assets/images/cursor-512.png?url'
-
-// Fonts
-import montserratFontData from './assets/fonts/Montserrat-font'
-export { montserratFontData as montserrat }

@@ -1,456 +1,354 @@
-import { describe, it, expect, afterEach } from 'vitest'
-import { render } from 'vitest-browser-react'
-import { enterVRSession } from '../test-utils/vitest-helpers'
-import { useMemo, useState } from 'react'
-import { XRTestCanvas } from '../test-utils/xr-test-setup'
-import { useVideoXRControls, type PlaybackAction } from './useVideoXRControls'
-import { Container, Text } from '@react-three/uikit'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { renderHook, act } from '@testing-library/react'
+import { useVideoXRControls } from './useVideoXRControls'
+import { createMockVideo } from '../test-utils'
+import type { UseXRButtonsReturn } from './useXRButtons'
 
-interface UseVideoXRControlsTestProps {
-  requirePointerOnTarget?: boolean
-}
+// Mock the useXRButtons hook
+vi.mock('./useXRButtons', () => ({
+  useXRButtons: vi.fn()
+}))
 
-// Mock video element - created once and reused
-const createMockVideo = () => {
-  // Remove any existing test video
-  const existing = document.getElementById('test-video')
-  if (existing) {
-    existing.remove()
-  }
-
-  const videoElement = document.createElement('video')
-  videoElement.id = 'test-video'
-  videoElement.currentTime = 30
-  Object.defineProperty(videoElement, 'duration', { value: 120, writable: true })
-
-  // Use a getter/setter for paused to ensure it's always up to date
-  let pausedState = true
-  Object.defineProperty(videoElement, 'paused', {
-    get: () => pausedState,
-    set: (value: boolean) => { pausedState = value },
-    configurable: true
-  })
-
-  // Mock play/pause methods
-  videoElement.play = () => {
-    pausedState = false
-    videoElement.dispatchEvent(new Event('play'))
-    return Promise.resolve()
-  }
-  videoElement.pause = () => {
-    pausedState = true
-    videoElement.dispatchEvent(new Event('pause'))
-  }
-
-  // Add to DOM so tests can find it
-  document.body.appendChild(videoElement)
-
-  return videoElement
-}
-
-function UseVideoXRControlsMesh({ video, requirePointerOnTarget }: { video: HTMLVideoElement; requirePointerOnTarget: boolean }) {
-  const [lastAction, setLastAction] = useState<PlaybackAction | null>(null)
-
-  const handleAction = (action: PlaybackAction) => {
-    setLastAction(action)
-
-    // Update DOM tracker
-    const tracker = document.getElementById('video-controls-tracker')
-    if (tracker) {
-      const actionType = action.type.replace('-', '')
-      const current = tracker.dataset[actionType] || '0'
-      tracker.dataset[actionType] = String(parseInt(current) + 1)
-      tracker.dataset.lastaction = action.type
-      if (action.value !== undefined) {
-        tracker.dataset.lastvalue = String(action.value)
-      }
-    }
-  }
-
-  const { targetRef, onPointerEnter, onPointerLeave, isPointerOnTarget } =
-    useVideoXRControls({
-      video,
-      requirePointerOnTarget,
-      onAction: handleAction
-    })
-
-  return (
-    <group position={[0, 1.5, -3]} ref={targetRef}>
-      <Container
-        pixelSize={0.010}
-        flexDirection="column"
-        alignItems="center"
-        gap={20}
-        padding={32}
-        backgroundColor="#1a1a1a"
-        borderRadius={16}
-        onPointerEnter={onPointerEnter}
-        onPointerLeave={onPointerLeave}
-      >
-        <Text fontSize={32} fontWeight="bold" color="white">
-          useVideoXRControls Test
-        </Text>
-
-        <Text fontSize={20} color={isPointerOnTarget ? "#4ade80" : "#ef4444"}>
-          Pointer: {isPointerOnTarget ? "ON" : "OFF"}
-        </Text>
-
-
-        <Container flexDirection="column" gap={8}>
-          <Text fontSize={18} color="#94a3b8">
-            Video State:
-          </Text>
-          <Text fontSize={16} color="#cbd5e1">
-            Paused: {video.paused ? 'Yes' : 'No'}
-          </Text>
-          <Text fontSize={16} color="#cbd5e1">
-            Time: {Math.floor(video.currentTime)}s / {Math.floor(video.duration)}s
-          </Text>
-        </Container>
-
-        {lastAction && (
-          <Container flexDirection="column" gap={4}>
-            <Text fontSize={18} color="#94a3b8">
-              Last Action:
-            </Text>
-            <Text fontSize={14} color="#cbd5e1">
-              Type: {lastAction.type}
-            </Text>
-            {lastAction.value !== undefined && (
-              <Text fontSize={14} color="#cbd5e1">
-                Value: {lastAction.value}s
-              </Text>
-            )}
-          </Container>
-        )}
-
-        <Text fontSize={14} color="#64748b">
-          A: Play/Pause | B: Toggle Controls
-        </Text>
-        <Text fontSize={14} color="#64748b">
-          Thumbstick: ← Rewind | Forward →
-        </Text>
-      </Container>
-    </group>
-  )
-}
-
-function UseVideoXRControlsTestScene({ requirePointerOnTarget = true }: UseVideoXRControlsTestProps) {
-  // Create mock video element
-  const video = useMemo(() => createMockVideo(), [])
-
-  return (
-    <>
-      {/* Hidden tracker for test assertions */}
-      <div
-        id="video-controls-tracker"
-        style={{ display: 'none' }}
-        data-play="0"
-        data-pause="0"
-        data-seekforward="0"
-        data-seekbackward="0"
-        data-togglecontrols="0"
-        data-lastaction=""
-        data-lastvalue=""
-      />
-
-      <XRTestCanvas>
-        <UseVideoXRControlsMesh video={video} requirePointerOnTarget={requirePointerOnTarget} />
-      </XRTestCanvas>
-    </>
-  )
-}
+import { useXRButtons } from './useXRButtons'
+const mockUseXRButtons = vi.mocked(useXRButtons)
 
 describe('useVideoXRControls Hook', () => {
-  afterEach(async () => {
-    // Clean up any existing session
-    const canvas = document.querySelector('canvas')
-    const store = (canvas as any)?.__xrStore
-    if (store?.getState().session) {
-      await store.getState().session.end()
+  let mockVideo: HTMLVideoElement
+  let mockXRButtonsReturn: UseXRButtonsReturn
+  let onActionCallback: ReturnType<typeof vi.fn>
+
+  beforeEach(() => {
+    // Reset mocks
+    vi.clearAllMocks()
+
+    // Create fresh mock video
+    mockVideo = createMockVideo({
+      currentTime: 30,
+      duration: 120,
+      paused: true
+    })
+
+    // Create mock XR buttons return value
+    mockXRButtonsReturn = {
+      targetRef: { current: null },
+      onPointerEnter: vi.fn(),
+      onPointerLeave: vi.fn(),
+      isPointerOnTarget: true
     }
 
-    // Clean up video element
-    const video = document.getElementById('test-video')
-    if (video) {
-      video.remove()
-    }
+    // Setup useXRButtons mock to return our mock and capture callbacks
+    mockUseXRButtons.mockImplementation((options) => {
+      // Store the callbacks so we can call them in tests
+      ;(mockXRButtonsReturn as any).__callbacks = options
+      return mockXRButtonsReturn
+    })
 
-    // Clean up DOM
-    document.body.innerHTML = ''
+    // Create action callback
+    onActionCallback = vi.fn() as any
   })
 
   describe('Play/Pause Control (A Button)', () => {
-    it('should play video when A button pressed and video is paused', async () => {
-      render(<UseVideoXRControlsTestScene requirePointerOnTarget={false} />)
+    it('should play video when A button pressed and video is paused', () => {
+      renderHook(() =>
+        useVideoXRControls({
+          video: mockVideo,
+          requirePointerOnTarget: false,
+          onAction: onActionCallback as any
+        })
+      )
 
-      const { controllers } = await enterVRSession({
-        container: document.body,
-        timeout: 10000
+      expect(mockVideo.paused).toBe(true)
+
+      // Simulate A button press (play/pause callback)
+      const callbacks = (mockXRButtonsReturn as any).__callbacks
+      act(() => {
+        callbacks.onAPress()
       })
 
-      const video = document.getElementById('test-video') as HTMLVideoElement
-      expect(video).toBeDefined()
-      expect(video!.paused).toBe(true)
-
-      // Press A button to play
-      await controllers.pressButton('a-button', 'right', 3)
-
-      const tracker = document.getElementById('video-controls-tracker')
-      await expect.poll(() => tracker?.dataset.play, { timeout: 3000 }).toBe('1')
-      await expect.poll(() => tracker?.dataset.lastaction, { timeout: 3000 }).toBe('play')
-      expect(video!.paused).toBe(false)
+      expect(mockVideo.play).toHaveBeenCalled()
+      expect(mockVideo.paused).toBe(false)
+      expect(onActionCallback).toHaveBeenCalledWith({
+        type: 'play',
+        source: 'controller'
+      })
     })
 
-    it('should pause video when A button pressed and video is playing', async () => {
-      render(<UseVideoXRControlsTestScene requirePointerOnTarget={false} />)
-
-      const { controllers } = await enterVRSession({
-        container: document.body,
-        timeout: 10000
+    it('should pause video when A button pressed and video is playing', () => {
+      // Start with playing video
+      mockVideo = createMockVideo({ paused: false })
+      Object.defineProperty(mockVideo, 'paused', {
+        get: () => false,
+        configurable: true
       })
 
-      const video = document.getElementById('test-video') as HTMLVideoElement
+      renderHook(() =>
+        useVideoXRControls({
+          video: mockVideo,
+          requirePointerOnTarget: false,
+          onAction: onActionCallback as any
+        })
+      )
 
-      // First press: play
-      await controllers.pressButton('a-button', 'right', 3)
-      const tracker = document.getElementById('video-controls-tracker')
-      await expect.poll(() => tracker?.dataset.play, { timeout: 3000 }).toBe('1')
+      // Simulate A button press
+      const callbacks = (mockXRButtonsReturn as any).__callbacks
+      act(() => {
+        callbacks.onAPress()
+      })
 
-      // Wait for video state to update and React to re-render
-      await controllers.waitFrames(5)
-
-      // Second press: pause
-      await controllers.pressButton('a-button', 'right', 3)
-      await expect.poll(() => tracker?.dataset.pause, { timeout: 3000 }).toBe('1')
-      await expect.poll(() => tracker?.dataset.lastaction, { timeout: 3000 }).toBe('pause')
-      expect(video!.paused).toBe(true)
+      expect(mockVideo.pause).toHaveBeenCalled()
+      expect(onActionCallback).toHaveBeenCalledWith({
+        type: 'pause',
+        source: 'controller'
+      })
     })
   })
 
   describe('Controls Visibility (B Button)', () => {
-    it('should toggle controls visibility when B button pressed', async () => {
-      render(<UseVideoXRControlsTestScene requirePointerOnTarget={false} />)
+    it('should fire toggle-controls action when B pressed', () => {
+      renderHook(() =>
+        useVideoXRControls({
+          video: mockVideo,
+          requirePointerOnTarget: false,
+          onAction: onActionCallback as any
+        })
+      )
 
-      const { controllers } = await enterVRSession({
-        container: document.body,
-        timeout: 10000
+      const callbacks = (mockXRButtonsReturn as any).__callbacks
+      act(() => {
+        callbacks.onBPress()
       })
 
-      // Press B button to toggle controls
-      await controllers.pressButton('b-button', 'right', 3)
-
-      const tracker = document.getElementById('video-controls-tracker')
-      await expect.poll(() => tracker?.dataset.togglecontrols, { timeout: 3000 }).toBe('1')
-      await expect.poll(() => tracker?.dataset.lastaction, { timeout: 3000 }).toBe('toggle-controls')
+      expect(onActionCallback).toHaveBeenCalledWith({
+        type: 'toggle-controls',
+        source: 'controller'
+      })
     })
 
-    it('should fire toggle-controls action when B pressed', async () => {
-      render(<UseVideoXRControlsTestScene requirePointerOnTarget={false} />)
+    it('should call toggleControlsRef function when B button pressed', () => {
+      const toggleFn = vi.fn()
+      const { result } = renderHook(() =>
+        useVideoXRControls({
+          video: mockVideo,
+          requirePointerOnTarget: false
+        })
+      )
 
-      const { controllers } = await enterVRSession({
-        container: document.body,
-        timeout: 10000
+      // Set up the toggle function
+      result.current.toggleControlsRef.current = toggleFn
+
+      // Simulate B button press
+      const callbacks = (mockXRButtonsReturn as any).__callbacks
+      act(() => {
+        callbacks.onBPress()
       })
 
-      await controllers.pressButton('b-button', 'right', 3)
-
-      const tracker = document.getElementById('video-controls-tracker')
-      await expect.poll(() => tracker?.dataset.togglecontrols, { timeout: 3000 }).toBe('1')
-      await expect.poll(() => tracker?.dataset.lastaction, { timeout: 3000 }).toBe('toggle-controls')
+      expect(toggleFn).toHaveBeenCalled()
     })
   })
 
   describe('Seek Controls (Thumbstick)', () => {
-    it('should seek forward 10 seconds on thumbstick right', async () => {
-      render(<UseVideoXRControlsTestScene requirePointerOnTarget={false} />)
+    it('should seek forward 10 seconds on thumbstick right', () => {
+      renderHook(() =>
+        useVideoXRControls({
+          video: mockVideo,
+          requirePointerOnTarget: false,
+          onAction: onActionCallback as any
+        })
+      )
 
-      const { controllers } = await enterVRSession({
-        container: document.body,
-        timeout: 10000
+      const initialTime = mockVideo.currentTime // 30s
+
+      // Simulate thumbstick right
+      const callbacks = (mockXRButtonsReturn as any).__callbacks
+      act(() => {
+        callbacks.onThumbstickRight()
       })
 
-      const video = document.getElementById('test-video') as HTMLVideoElement
-      const initialTime = video!.currentTime // Should be 30s
-
-      // Move thumbstick right
-      await controllers.moveThumbstick('right', 0.8, 0, 100)
-
-      const tracker = document.getElementById('video-controls-tracker')
-      await expect.poll(() => tracker?.dataset.seekforward, { timeout: 3000 }).toBe('1')
-      await expect.poll(() => tracker?.dataset.lastaction, { timeout: 3000 }).toBe('seek-forward')
-      await expect.poll(() => tracker?.dataset.lastvalue, { timeout: 3000 }).toBe('10')
-
-      // Video should have seeked forward 10 seconds
-      expect(video!.currentTime).toBe(initialTime + 10)
+      expect(mockVideo.currentTime).toBe(initialTime + 10)
+      expect(mockVideo.currentTime).toBe(40)
+      expect(onActionCallback).toHaveBeenCalledWith({
+        type: 'seek-forward',
+        source: 'controller',
+        value: 10
+      })
     })
 
-    it('should seek backward 10 seconds on thumbstick left', async () => {
-      render(<UseVideoXRControlsTestScene requirePointerOnTarget={false} />)
+    it('should seek backward 10 seconds on thumbstick left', () => {
+      renderHook(() =>
+        useVideoXRControls({
+          video: mockVideo,
+          requirePointerOnTarget: false,
+          onAction: onActionCallback as any
+        })
+      )
 
-      const { controllers } = await enterVRSession({
-        container: document.body,
-        timeout: 10000
+      const initialTime = mockVideo.currentTime // 30s
+
+      // Simulate thumbstick left
+      const callbacks = (mockXRButtonsReturn as any).__callbacks
+      act(() => {
+        callbacks.onThumbstickLeft()
       })
 
-      const video = document.getElementById('test-video') as HTMLVideoElement
-      const initialTime = video!.currentTime // Should be 30s
-
-      // Move thumbstick left
-      await controllers.moveThumbstick('right', -0.8, 0, 100)
-
-      const tracker = document.getElementById('video-controls-tracker')
-      await expect.poll(() => tracker?.dataset.seekbackward, { timeout: 3000 }).toBe('1')
-      await expect.poll(() => tracker?.dataset.lastaction, { timeout: 3000 }).toBe('seek-backward')
-      await expect.poll(() => tracker?.dataset.lastvalue, { timeout: 3000 }).toBe('10')
-
-      // Video should have seeked backward 10 seconds
-      expect(video!.currentTime).toBe(initialTime - 10)
+      expect(mockVideo.currentTime).toBe(initialTime - 10)
+      expect(mockVideo.currentTime).toBe(20)
+      expect(onActionCallback).toHaveBeenCalledWith({
+        type: 'seek-backward',
+        source: 'controller',
+        value: 10
+      })
     })
 
-    it('should clamp forward seek at video duration', async () => {
-      render(<UseVideoXRControlsTestScene requirePointerOnTarget={false} />)
+    it('should clamp forward seek at video duration', () => {
+      mockVideo.currentTime = 115 // Near end
 
-      const { controllers } = await enterVRSession({
-        container: document.body,
-        timeout: 10000
-      })
-
-      const video = document.getElementById('test-video') as HTMLVideoElement
-      // Set time near end (duration is 120s)
-      video!.currentTime = 115
+      renderHook(() =>
+        useVideoXRControls({
+          video: mockVideo,
+          requirePointerOnTarget: false,
+          onAction: onActionCallback as any
+        })
+      )
 
       // Try to seek forward 10 seconds (would go to 125, but should clamp to 120)
-      await controllers.moveThumbstick('right', 0.8, 0, 100)
-
-      const tracker = document.getElementById('video-controls-tracker')
-      await expect.poll(() => tracker?.dataset.seekforward, { timeout: 3000 }).toBe('1')
-
-      // Should be clamped to duration
-      expect(video!.currentTime).toBe(120)
-    })
-
-    it('should clamp backward seek at 0', async () => {
-      render(<UseVideoXRControlsTestScene requirePointerOnTarget={false} />)
-
-      const { controllers } = await enterVRSession({
-        container: document.body,
-        timeout: 10000
+      const callbacks = (mockXRButtonsReturn as any).__callbacks
+      act(() => {
+        callbacks.onThumbstickRight()
       })
 
-      const video = document.getElementById('test-video') as HTMLVideoElement
-      // Set time near beginning
-      video!.currentTime = 5
+      expect(mockVideo.currentTime).toBe(120) // Clamped to duration
+      expect(onActionCallback).toHaveBeenCalledWith({
+        type: 'seek-forward',
+        source: 'controller',
+        value: 10
+      })
+    })
+
+    it('should clamp backward seek at 0', () => {
+      mockVideo.currentTime = 5 // Near beginning
+
+      renderHook(() =>
+        useVideoXRControls({
+          video: mockVideo,
+          requirePointerOnTarget: false,
+          onAction: onActionCallback as any
+        })
+      )
 
       // Try to seek backward 10 seconds (would go to -5, but should clamp to 0)
-      await controllers.moveThumbstick('right', -0.8, 0, 100)
+      const callbacks = (mockXRButtonsReturn as any).__callbacks
+      act(() => {
+        callbacks.onThumbstickLeft()
+      })
 
-      const tracker = document.getElementById('video-controls-tracker')
-      await expect.poll(() => tracker?.dataset.seekbackward, { timeout: 3000 }).toBe('1')
-
-      // Should be clamped to 0
-      expect(video!.currentTime).toBe(0)
+      expect(mockVideo.currentTime).toBe(0) // Clamped to 0
+      expect(onActionCallback).toHaveBeenCalledWith({
+        type: 'seek-backward',
+        source: 'controller',
+        value: 10
+      })
     })
   })
 
   describe('Pointer Awareness', () => {
-    it('should not fire actions when pointer is off target (requirePointerOnTarget=true)', async () => {
-      render(<UseVideoXRControlsTestScene requirePointerOnTarget={true} />)
+    it('should pass requirePointerOnTarget to useXRButtons', () => {
+      renderHook(() =>
+        useVideoXRControls({
+          video: mockVideo,
+          requirePointerOnTarget: true
+        })
+      )
 
-      const { controllers } = await enterVRSession({
-        container: document.body,
-        timeout: 10000
-      })
-
-      // Move controller away from target
-      const emulator = controllers['store'].getState().emulator
-      const controller = emulator?.controllers.right
-      if (controller) {
-        controller.position.set(2, 1.5, -2)
-        controller.quaternion.y = 0.707  // Point away
-        controller.quaternion.w = 0.707
-      }
-      await controllers.waitFrames(2)
-
-      // Press A button while NOT pointing
-      await controllers.pressButton('a-button', 'right', 3)
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      // Verify button was NOT pressed
-      const tracker = document.getElementById('video-controls-tracker')
-      expect(tracker!.dataset.play).toBe('0')
-      expect(tracker!.dataset.pause).toBe('0')
+      expect(mockUseXRButtons).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requirePointerOn: true
+        })
+      )
     })
 
-    it('should fire actions regardless of pointer when requirePointerOnTarget=false', async () => {
-      render(<UseVideoXRControlsTestScene requirePointerOnTarget={false} />)
+    it('should pass requirePointerOnTarget=false to useXRButtons when disabled', () => {
+      renderHook(() =>
+        useVideoXRControls({
+          video: mockVideo,
+          requirePointerOnTarget: false
+        })
+      )
 
-      const { controllers } = await enterVRSession({
-        container: document.body,
-        timeout: 10000
-      })
-
-      // Move controller away from target (same as above)
-      const emulator = controllers['store'].getState().emulator
-      const controller = emulator?.controllers.right
-      if (controller) {
-        controller.position.set(2, 1.5, -2)
-        controller.quaternion.y = 0.707
-        controller.quaternion.w = 0.707
-      }
-      await controllers.waitFrames(2)
-
-      // Press A button while NOT pointing
-      await controllers.pressButton('a-button', 'right', 3)
-
-      // Button SHOULD fire even without pointer on target
-      const tracker = document.getElementById('video-controls-tracker')
-      await expect.poll(() => tracker?.dataset.play, { timeout: 3000 }).toBe('1')
+      expect(mockUseXRButtons).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requirePointerOn: false
+        })
+      )
     })
   })
 
-  describe('Action Callbacks', () => {
-    it('should fire onAction callback with correct PlaybackAction for play', async () => {
-      render(<UseVideoXRControlsTestScene requirePointerOnTarget={false} />)
+  describe('Hook Return Values', () => {
+    it('should return all values from useXRButtons', () => {
+      const { result } = renderHook(() =>
+        useVideoXRControls({
+          video: mockVideo,
+          requirePointerOnTarget: false
+        })
+      )
 
-      const { controllers } = await enterVRSession({
-        container: document.body,
-        timeout: 10000
-      })
-
-      await controllers.pressButton('a-button', 'right', 3)
-
-      const tracker = document.getElementById('video-controls-tracker')
-      await expect.poll(() => tracker?.dataset.lastaction, { timeout: 3000 }).toBe('play')
+      expect(result.current.targetRef).toBe(mockXRButtonsReturn.targetRef)
+      expect(result.current.onPointerEnter).toBe(mockXRButtonsReturn.onPointerEnter)
+      expect(result.current.onPointerLeave).toBe(mockXRButtonsReturn.onPointerLeave)
+      expect(result.current.isPointerOnTarget).toBe(true)
     })
 
-    it('should fire onAction callback with correct PlaybackAction for seek', async () => {
-      render(<UseVideoXRControlsTestScene requirePointerOnTarget={false} />)
+    it('should return toggleControlsRef', () => {
+      const { result } = renderHook(() =>
+        useVideoXRControls({
+          video: mockVideo,
+          requirePointerOnTarget: false
+        })
+      )
 
-      const { controllers } = await enterVRSession({
-        container: document.body,
-        timeout: 10000
+      expect(result.current.toggleControlsRef).toBeDefined()
+      expect(result.current.toggleControlsRef.current).toBe(null)
+    })
+  })
+
+  describe('Edge Cases', () => {
+    it('should handle missing video gracefully', () => {
+      renderHook(() =>
+        useVideoXRControls({
+          video: undefined,
+          requirePointerOnTarget: false,
+          onAction: onActionCallback as any
+        })
+      )
+
+      // Try to trigger actions without video
+      const callbacks = (mockXRButtonsReturn as any).__callbacks
+      act(() => {
+        callbacks.onAPress()
+        callbacks.onThumbstickRight()
+        callbacks.onThumbstickLeft()
       })
 
-      await controllers.moveThumbstick('right', 0.8, 0, 100)
-
-      const tracker = document.getElementById('video-controls-tracker')
-      await expect.poll(() => tracker?.dataset.lastaction, { timeout: 3000 }).toBe('seek-forward')
-      await expect.poll(() => tracker?.dataset.lastvalue, { timeout: 3000 }).toBe('10')
+      // Should not throw, and no actions should be called
+      expect(onActionCallback).not.toHaveBeenCalled()
     })
 
-    it('should fire onAction callback with correct PlaybackAction for controls toggle', async () => {
-      render(<UseVideoXRControlsTestScene requirePointerOnTarget={false} />)
+    it('should handle missing onAction callback', () => {
+      renderHook(() =>
+        useVideoXRControls({
+          video: mockVideo,
+          requirePointerOnTarget: false
+        })
+      )
 
-      const { controllers } = await enterVRSession({
-        container: document.body,
-        timeout: 10000
-      })
+      // Should not throw when triggering actions without callback
+      const callbacks = (mockXRButtonsReturn as any).__callbacks
+      expect(() => {
+        act(() => {
+          callbacks.onAPress()
+        })
+      }).not.toThrow()
 
-      await controllers.pressButton('b-button', 'right', 3)
-
-      const tracker = document.getElementById('video-controls-tracker')
-      await expect.poll(() => tracker?.dataset.lastaction, { timeout: 3000 }).toBe('toggle-controls')
+      expect(mockVideo.play).toHaveBeenCalled()
     })
   })
 })

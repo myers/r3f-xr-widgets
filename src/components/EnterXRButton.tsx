@@ -1,5 +1,5 @@
 import { type XRStore } from '@react-three/xr'
-import { useState, useEffect } from 'react'
+import { useSyncExternalStore } from 'react'
 import { useXRSessionModeSupportedPolling } from '../hooks/useXRSessionModeSupportedPolling'
 import createDebug from 'debug'
 
@@ -58,23 +58,17 @@ const defaultButtonStyle: React.CSSProperties = {
  */
 export function EnterXRButton(props: EnterXRButtonProps) {
   const { store, mode = 'immersive-vr', style, buttonStyle, id } = props
-  const [inSession, setInSession] = useState(false)
   const isSupported = useXRSessionModeSupportedPolling(mode)
 
-  // Subscribe to session state and hide when in session
-  useEffect(() => {
-    // Initialize state from current store value
-    setInSession(store.getState().session !== undefined)
-
-    // Subscribe to future changes
-    const unsubscribe = store.subscribe((state, prevState) => {
-      if (state.session !== prevState.session) {
-        setInSession(state.session !== undefined)
-      }
-    })
-
-    return unsubscribe
-  }, [store])
+  // Subscribe to session state using React 18's useSyncExternalStore
+  // This is the recommended way to subscribe to external stores and works better
+  // with React's testing boundaries than manual subscriptions with useState
+  const inSession = useSyncExternalStore(
+    // subscribe function: called with a callback that should be invoked when store changes
+    (onStoreChange) => store.subscribe(onStoreChange),
+    // getSnapshot: returns the current value to render
+    () => store.getState().session !== undefined
+  )
 
   // Hide when in session
   if (inSession) {

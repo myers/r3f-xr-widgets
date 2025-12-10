@@ -4,7 +4,7 @@ layout: home
 hero:
   name: r3f-xr-widgets
   text: XR/VR Widgets for React Three Fiber
-  tagline: Production-ready components for building immersive WebXR experiences
+  tagline: XR widgets and utilities for React Three Fiber
   image:
     src: /logo.svg
     alt: r3f-xr-widgets

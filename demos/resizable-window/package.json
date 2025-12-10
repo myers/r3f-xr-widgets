@@ -1,19 +1,28 @@
 {
-  "name": "r3f-xr-widgets-resizable-window-demo",
-  "description": "Interactive demo showcasing ResizableWindow components with UIKit integration, featuring draggable and resizable windows in VR",
+  "name": "resizable-window-demo",
+  "description": "Showcasing ResizableWindow components with UIKit integration, featuring draggable and resizable windows in VR",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "config": {
+    "port": 9001,
+    "base": "/r3f-xr-widgets/resizable-window/"
+  },
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@pmndrs/pointer-events": "^6.6.27",
+    "@preact/signals-core": "^1.9.0",
     "@react-three/drei": "^10.5.2",
     "@react-three/fiber": "^9.2.0",
     "@react-three/handle": "^6.6.20",
-    "@react-three/uikit": "^0.8.21",
+    "@react-three/uikit": "~1.0.0",
+    "@react-three/uikit-default": "~1.0.0",
+    "@react-three/uikit-horizon": "~1.0.0",
+    "@react-three/uikit-lucide": "~1.0.0",
     "@react-three/xr": "^6.6.20",
     "r3f-xr-widgets": "workspace:*",
     "react": "^19.1.0",
@@ -21,7 +30,7 @@
     "three": "^0.165.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-basic-ssl": "^2.1.0",
+    "@vitejs/plugin-react": "^5.0.4",
     "vite": "^7.1.9"
   }
 }
