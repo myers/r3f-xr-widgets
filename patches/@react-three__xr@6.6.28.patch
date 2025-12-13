@@ -1,0 +1,50 @@
+diff --git a/dist/layer.d.ts b/dist/layer.d.ts
+index f54dc5a009236f22db34f2b487abd9c72481a949..8fdc1e481954586c8f730d88e8c30096b87bb74c 100644
+--- a/dist/layer.d.ts
++++ b/dist/layer.d.ts
+@@ -3,7 +3,7 @@ import { RootState, ThreeElements } from '@react-three/fiber';
+ import { MutableRefObject, ReactNode } from 'react';
+ import { BufferGeometry, Mesh, WebGLRenderTarget } from 'three';
+ import { StoreApi } from 'zustand';
+-export type XRLayerProperties = XRLayerOptions & XRLayerDynamicProperties & Omit<ThreeElements['mesh'], 'geometry' | 'ref'> & {
++export type XRLayerProperties = XRLayerOptions & XRLayerDynamicProperties & Omit<ThreeElements['mesh'], 'geometry'> & {
+     renderPriority?: number;
+     children?: ReactNode;
+     pixelWidth?: number;
+@@ -26,7 +26,7 @@ export type XRLayerProperties = XRLayerOptions & XRLayerDynamicProperties & Omit
+  * #### `chromaticAberrationCorrection` - Property to configure whether chromatic abberration should be corrected by the layer.
+  * #### `quality` - Property to configure for what type of content the layer should be optimized ("default", "text-optimized", "graphics-optimized").
+  */
+-export declare function XRLayer({ src, pixelWidth, pixelHeight, dpr, renderPriority, children, customRender, ...props }: XRLayerProperties): import("react/jsx-runtime").JSX.Element | null;
++export declare const XRLayer: import("react").ForwardRefExoticComponent<XRLayerProperties & import("react").RefAttributes<Mesh<BufferGeometry<import("three").NormalBufferAttributes>, import("three").Material | import("three").Material[], import("three").Object3DEventMap>>>;
+ export declare const XRLayerImplementation: import("react").ForwardRefExoticComponent<Omit<XRLayerProperties, "src"> & {
+     src?: Exclude<XRLayerSrc, WebGLRenderTarget>;
+     geometry?: BufferGeometry;
+diff --git a/dist/layer.js b/dist/layer.js
+index 6b70a50c0b51d37465f92a56fae4e4dd27945ab8..a0761d5f7495e8f775b27ff3abcb8ae2793fbcfb 100644
+--- a/dist/layer.js
++++ b/dist/layer.js
+@@ -21,7 +21,7 @@ import { useXR, useXRStore } from './xr.js';
+  * #### `chromaticAberrationCorrection` - Property to configure whether chromatic abberration should be corrected by the layer.
+  * #### `quality` - Property to configure for what type of content the layer should be optimized ("default", "text-optimized", "graphics-optimized").
+  */
+-export function XRLayer({ src, pixelWidth = 1024, pixelHeight = 1024, dpr = 1, renderPriority = 0, children, customRender, ...props }) {
++export const XRLayer = forwardRef(function XRLayer({ src, pixelWidth = 1024, pixelHeight = 1024, dpr = 1, renderPriority = 0, children, customRender, ...props }, forwardedRef) {
+     const [hasSize, setHasSize] = useState(false);
+     const ref = useRef(null);
+     const renderTargetRef = useRef(undefined);
+@@ -41,11 +41,13 @@ export function XRLayer({ src, pixelWidth = 1024, pixelHeight = 1024, dpr = 1, r
+     }), [props.centralAngle, props.centralHorizontalAngle, props.lowerVerticalAngle, props.shape, props.upperVerticalAngle]);
+     const store = useLayerStore(pixelWidth, pixelHeight, dpr);
+     useForwardEvents(store, ref, [hasSize, layersEnabled]);
++    // hasSize and layersEnabled are deps because ref.current is only populated after children render
++    useImperativeHandle(forwardedRef, () => ref.current, [hasSize, layersEnabled]);
+     if (!hasSize) {
+         return null;
+     }
+     return (_jsxs(_Fragment, { children: [src == null && (_jsx(ChildrenToRenderTarget, { customRender: customRender, store: store, renderPriority: renderPriority, renderTargetRef: renderTargetRef, layerEntryRef: layersEnabled ? layerEntryRef : undefined, children: children })), layersEnabled ? (_jsx(XRLayerImplementation, { renderTargetRef: renderTargetRef, layerEntryRef: layerEntryRef, pixelWidth: pixelWidth, pixelHeight: pixelHeight, dpr: dpr, ref: ref, ...props, src: src, geometry: geometry })) : (_jsx(FallbackXRLayerImplementation, { renderTargetRef: renderTargetRef, ref: ref, ...props, src: src, pixelWidth: pixelWidth, pixelHeight: pixelHeight, dpr: dpr, geometry: geometry }))] }));
+-}
++});
+ export const XRLayerImplementation = forwardRef(({ src, shape, colorFormat, depthFormat, layout, mipLevels, renderOrder = 0, blendTextureSourceAlpha, centralAngle, centralHorizontalAngle, chromaticAberrationCorrection, lowerVerticalAngle, quality, upperVerticalAngle, invertStereo, pixelWidth, pixelHeight, dpr, renderTargetRef, layerEntryRef, ...props }, ref) => {
+     const internalRef = useRef(null);
+     const renderer = useThree((state) => state.gl);

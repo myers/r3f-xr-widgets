@@ -1,0 +1,11 @@
+# Configuration for nektos/act - local GitHub Actions testing
+# https://github.com/nektos/act
+
+# Use a full-featured Ubuntu image with systemd support
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+
+# Mount Docker socket to allow Docker-in-Docker (needed for some Playwright operations)
+--container-daemon-socket -
+
+# Use GitHub cache server for faster local runs
+--use-gitignore=false

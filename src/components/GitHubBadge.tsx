@@ -1,10 +1,46 @@
 import { CSSProperties } from 'react'
 
-interface GitHubBadgeProps {
+/**
+ * Props for the GitHubBadge component
+ * @group Types
+ */
+export interface GitHubBadgeProps {
+  /**
+   * Full GitHub repository URL (e.g., "https://github.com/username/repo")
+   */
   repoUrl: string
 }
 
-export function GitHubBadge({ repoUrl }: GitHubBadgeProps) {
+/**
+ * GitHub repository badge/link component for demos
+ *
+ * Displays a styled button with the GitHub logo and repository name extracted from the URL.
+ * Useful for adding repository links to demo applications and documentation.
+ *
+ * @group Components
+ *
+ * @example
+ * ```tsx
+ * <GitHubBadge repoUrl="https://github.com/pmndrs/r3f-xr-widgets" />
+ * ```
+ *
+ * @example In a demo application
+ * ```tsx
+ * function Demo() {
+ *   return (
+ *     <div>
+ *       <h1>My XR Demo</h1>
+ *       <Canvas>
+ *         {/* ... 3D content ... *\/}
+ *       </Canvas>
+ *       <GitHubBadge repoUrl="https://github.com/username/my-demo" />
+ *     </div>
+ *   )
+ * }
+ * ```
+ */
+export function GitHubBadge(props: GitHubBadgeProps) {
+  const { repoUrl } = props
   // Extract username/repo from GitHub URL
   const getRepoPath = (url: string) => {
     try {

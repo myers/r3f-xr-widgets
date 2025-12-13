@@ -1,0 +1,190 @@
+diff --git a/dist/space.js b/dist/space.js
+index 01670f7705e54475ffc9d0c2c7efdf779b09adcd..ae5b0e5b71151fb6a7ff85b985c143c02b4306fa 100644
+--- a/dist/space.js
++++ b/dist/space.js
+@@ -18,7 +18,7 @@ export function createGetXRSpaceMatrix(space, referenceSpace) {
+ }
+ export function getSpaceFromAncestors(object, origin, originReferenceSpace, targetOffsetMatrix) {
+     targetOffsetMatrix?.copy(object.matrix);
+-    const result = getXRSpaceFromAncestorsRec(object.parent, targetOffsetMatrix);
++    const result = getXRSpaceFromAncestorsRec(object.parent, object, targetOffsetMatrix);
+     if (result != null) {
+         return result;
+     }
+@@ -38,13 +38,22 @@ function computeOriginReferenceSpaceOffset(object, origin, target) {
+     //target = origin.matrixWorld-1 * object.matrixWorld
+     target.copy(origin.matrixWorld).invert().multiply(object.matrixWorld);
+ }
+-function getXRSpaceFromAncestorsRec(object, targetOffsetMatrix) {
++/**
++ * Recursively searches ancestors for an xrSpace.
++ */
++function getXRSpaceFromAncestorsRec(object, targetObject, targetOffsetMatrix) {
+     if (object == null) {
+         return undefined;
+     }
+     if (object.xrSpace != null) {
++        // Calculate offset using world matrices instead of accumulating local matrices.
++        // This correctly handles components that override updateWorldMatrix (e.g., UIKit Content).
++        if (targetOffsetMatrix != null) {
++            targetObject.updateWorldMatrix(true, false);
++            object.updateWorldMatrix(true, false);
++            targetOffsetMatrix.copy(object.matrixWorld).invert().multiply(targetObject.matrixWorld);
++        }
+         return object.xrSpace;
+     }
+-    targetOffsetMatrix?.premultiply(object.matrix);
+-    return getXRSpaceFromAncestorsRec(object.parent, targetOffsetMatrix);
++    return getXRSpaceFromAncestorsRec(object.parent, targetObject, targetOffsetMatrix);
+ }
+diff --git a/dist/store.d.ts b/dist/store.d.ts
+index 01089e7b9804f0df1547f1d6b4797757d5b3bb57..c26c3c24f75ecf239e9459ab6b63c4e09b8cf979 100644
+--- a/dist/store.d.ts
++++ b/dist/store.d.ts
+@@ -212,6 +212,11 @@ export type XRStore<T extends XRElementImplementations> = Omit<StoreApi<XRState<
+     enterXR(mode: XRSessionMode): Promise<XRSession | undefined>;
+     enterAR(): Promise<XRSession | undefined>;
+     enterVR(): Promise<XRSession | undefined>;
++    /**
++     * cleans up the emulator and resets navigator.xr
++     * waits for pending emulator injection to complete before cleanup
++     */
++    cleanupEmulator(): Promise<void>;
+     /**
+      * update the hand configuration or implementation for both or only one hand
+      */
+diff --git a/dist/store.js b/dist/store.js
+index 8d271a37ef747f26d21df39b33f302bab7d867bf..b91246ed1f75a89be57fb675c0322bd8c550352a 100644
+--- a/dist/store.js
++++ b/dist/store.js
+@@ -93,10 +93,11 @@ export function createXRStore(options) {
+     //emulation
+     const emulate = options?.emulate ?? 'metaQuest3';
+     let cleanupEmulate;
++    let emulatorInjectionPromise; // Closure variable for passing to enterXRSession
+     if (typeof window !== 'undefined' && emulate != false) {
+         const inject = (typeof emulate === 'object' ? emulate.inject : undefined) ?? { hostname: 'localhost' };
+         if (inject === true || (typeof inject != 'boolean' && window.location.hostname === inject.hostname)) {
+-            injectEmulator(store, emulate, false).then((emulate) => {
++            emulatorInjectionPromise = injectEmulator(store, emulate, false).then((emulate) => {
+                 if (!emulate || xrManager == null) {
+                     return;
+                 }
+@@ -135,12 +136,19 @@ export function createXRStore(options) {
+     }
+     const syncXRInputSourceStates = createSyncXRInputSourceStates((state) => store.setState({ inputSourceStates: [...store.getState().inputSourceStates, state] }), options);
+     const bindToSession = createBindToSession(store, syncXRInputSourceStates, options?.secondaryInputSources ?? false);
+-    const cleanupSessionGrantedListener = setupSessionGrantedListener(options?.enterGrantedSession, (mode) => enterXRSession(domOverlayRoot, mode, options, xrManager));
+     const frameRequests = [];
+     let xrManager;
++    let managerReadyResolvers = [];
+     const onSessionStart = () => {
+         store.setState(bindToSession(xrManager.getSession()));
+     };
++    const waitForManager = () => {
++        if (xrManager != null) {
++            return Promise.resolve(xrManager);
++        }
++        return new Promise((resolve) => managerReadyResolvers.push(resolve));
++    };
++    const cleanupSessionGrantedListener = setupSessionGrantedListener(options?.enterGrantedSession, (mode) => enterXRSession(domOverlayRoot, mode, options, xrManager, waitForManager, emulatorInjectionPromise));
+     return Object.assign(store, {
+         addLayerEntry(layerEntry) {
+             if (store.getState().session == null) {
+@@ -170,6 +178,9 @@ export function createXRStore(options) {
+                 xrManager.setFoveation(foveation);
+             }
+             offerSession(xrManager, options, domOverlayRoot).catch(console.error);
++            // Resolve all promises waiting for manager
++            managerReadyResolvers.forEach(resolve => resolve(xrManager));
++            managerReadyResolvers = [];
+         },
+         setFrameRate(value) {
+             const { session } = store.getState();
+@@ -247,9 +258,61 @@ export function createXRStore(options) {
+             //unbinding the session
+             bindToSession(undefined);
+         },
+-        enterXR: (mode) => enterXRSession(domOverlayRoot, mode, options, xrManager),
+-        enterAR: () => enterXRSession(domOverlayRoot, 'immersive-ar', options, xrManager),
+-        enterVR: () => enterXRSession(domOverlayRoot, 'immersive-vr', options, xrManager),
++        async cleanupEmulator() {
++            // CRITICAL: Wait for any pending emulator injection before cleanup
++            // This prevents race condition where async emulate() -> installRuntime()
++            // completes AFTER cleanup runs, reinstalling XRSystem on navigator.xr
++            if (emulatorInjectionPromise) {
++                await emulatorInjectionPromise;
++            }
++
++            // Get the emulator (XRDevice) before cleanup
++            const emulator = store.getState().emulator;
++
++            if (emulator) {
++                const activeSession = emulator.activeSession;
++
++                if (activeSession) {
++                    // End the session - our iwer patch ensures this sets ended=true
++                    // which stops the frame loop before WebGL context is destroyed
++                    await activeSession.end().catch(() => {});
++                }
++            }
++
++            // Clean up all iwer-installed globals to allow fresh emulator creation
++            const xrGlobals = [
++                'XRSystem', 'XRSession', 'XRRenderState', 'XRFrame',
++                'XRSpace', 'XRReferenceSpace', 'XRJointSpace',
++                'XRView', 'XRViewport', 'XRRigidTransform',
++                'XRPose', 'XRViewerPose', 'XRJointPose',
++                'XRInputSource', 'XRInputSourceArray', 'XRHand',
++                'XRLayer', 'XRWebGLLayer',
++                'XRSessionEvent', 'XRInputSourceEvent',
++                'XRInputSourcesChangeEvent', 'XRReferenceSpaceEvent'
++            ];
++            xrGlobals.forEach(key => {
++                delete window[key];
++            });
++
++            // Delete the iwer XRSystem from navigator.xr completely
++            delete navigator.xr;
++
++            // Create a fake XR object with no prototype to avoid XRSystem constructor pollution
++            const fakeXR = Object.create(null);
++            fakeXR.isSessionSupported = () => Promise.resolve(false);
++            fakeXR.addEventListener = () => {}; // No-op for 'sessiongranted' listener
++            fakeXR.removeEventListener = () => {}; // No-op for cleanup
++
++            // Replace navigator.xr with the fake object
++            Object.defineProperty(navigator, 'xr', {
++                value: fakeXR,
++                configurable: true,
++                writable: true
++            });
++        },
++        enterXR: (mode) => enterXRSession(domOverlayRoot, mode, options, xrManager, waitForManager, emulatorInjectionPromise),
++        enterAR: () => enterXRSession(domOverlayRoot, 'immersive-ar', options, xrManager, waitForManager, emulatorInjectionPromise),
++        enterVR: () => enterXRSession(domOverlayRoot, 'immersive-vr', options, xrManager, waitForManager, emulatorInjectionPromise),
+         onBeforeFrame(scene, camera, frame) {
+             let update;
+             const referenceSpace = xrManager?.getReferenceSpace() ?? undefined;
+@@ -369,12 +432,19 @@ async function setFrameRate(session, frameRate) {
+     const multiplier = frameRate === 'high' ? 1 : frameRate === 'mid' ? 0.5 : 0;
+     await session.updateTargetFrameRate(supportedFrameRates[Math.ceil((supportedFrameRates.length - 1) * multiplier)]);
+ }
+-async function enterXRSession(domOverlayRoot, mode, options, manager) {
++async function enterXRSession(domOverlayRoot, mode, options, manager, waitForManager, emulatorInjectionPromise) {
+     if (typeof navigator === 'undefined' || navigator.xr == null) {
+         return Promise.reject(new Error(`WebXR not supported`));
+     }
++
++    // CRITICAL: Wait for emulator injection to complete before proceeding
++    // This prevents race condition where emulate() -> installRuntime() might still be running
++    if (emulatorInjectionPromise) {
++        await emulatorInjectionPromise;
++    }
++
+     if (manager == null) {
+-        return Promise.reject(new Error(`not connected to three.js. You either might be missing the <XR> component or the canvas is not yet loaded?`));
++        manager = await waitForManager();
+     }
+     const session = await navigator.xr.requestSession(mode, buildXRSessionInit(mode, domOverlayRoot, options));
+     await setupXRSession(session, manager, options);

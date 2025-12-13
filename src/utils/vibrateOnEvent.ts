@@ -9,6 +9,7 @@ import { isXRInputSourceState } from '@react-three/xr'
 
 /**
  * Configuration for haptic pulse feedback
+ * @group Types
  */
 export interface PulseConfig {
   /** Pulse intensity (0.0 to 1.0). Defaults to 0.3 */
@@ -23,6 +24,8 @@ export interface PulseConfig {
  * Uses the WebXR Gamepad API's `hapticActuators[0].pulse()` method to provide
  * tactile feedback to users in VR/AR. Only triggers if the event comes from
  * an XR controller input source.
+ *
+ * @group Utilities
  *
  * @param e - Pointer event from React Three Fiber interaction
  * @param pulse - Optional pulse configuration (intensity and duration)

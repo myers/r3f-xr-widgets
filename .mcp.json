@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["chrome-devtools-mcp@0.10.1", "--acceptInsecureCerts", "--isolated"],
+      "env": {}
+    }
+  }
+}

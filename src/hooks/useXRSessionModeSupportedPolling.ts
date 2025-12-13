@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState, startTransition } from 'react'
+import createDebug from 'debug'
+
+const debug = createDebug('r3f-xr-widgets:hooks:xr-session')
 
 /**
  * Temporary polling-based hook to check if a specific XRSessionMode is supported.
@@ -7,59 +10,51 @@ import { useEffect, useRef, useState } from 'react'
  * Once the React XR PR with devicechange support is merged, this can be replaced
  * with the event-driven implementation from @react-three/xr.
  *
+ * @group Hooks
+ *
  * @param mode - The XRSessionMode to check ('immersive-vr' | 'immersive-ar' | 'inline')
  * @returns boolean | undefined - true if supported, false if not, undefined if still checking
  */
 export function useXRSessionModeSupportedPolling(mode: XRSessionMode): boolean | undefined {
   const [supported, setSupported] = useState<boolean | undefined>(undefined)
-  const startTimeRef = useRef<number | null>(null)
 
   useEffect(() => {
-    // If we already found support, no need to poll
-    if (supported === true) {
-      startTimeRef.current = null // Reset for next time
+    let mounted = true
+    let interval: ReturnType<typeof setInterval> | null = null
+
+    if (typeof navigator === 'undefined' || !navigator.xr) {
+      debug(`[${mode}]: No navigator.xr`)
+      setSupported(false)
       return
     }
 
-    // Set start time only once (when null)
-    if (startTimeRef.current === null) {
-      startTimeRef.current = performance.now()
-    }
-
-    // Check immediately
     const checkSupport = () => {
-      if (typeof navigator === 'undefined' || !navigator.xr) {
-        setSupported(false)
-        return false
-      }
-
-      navigator.xr
-        .isSessionSupported(mode)
+      navigator.xr!.isSessionSupported(mode)
         .then((isSupported) => {
-          setSupported(isSupported)
+          if (!mounted) return
+          debug(`[${mode}]: isSessionSupported=${isSupported}`)
+          startTransition(() => setSupported(isSupported))
+          // Stop polling once support is detected
+          if (isSupported && interval) {
+            clearInterval(interval)
+            interval = null
+          }
         })
-        .catch(() => {
-          setSupported(false)
+        .catch((err) => {
+          if (!mounted) return
+          debug(`[${mode}]: error`, err)
+          startTransition(() => setSupported(false))
         })
-
-      return true
     }
 
-    // Initial check
-    const hasNavigatorXR = checkSupport()
+    checkSupport()
+    interval = setInterval(checkSupport, 100)
 
-    // If no navigator.xr, don't bother polling
-    if (!hasNavigatorXR) {
-      return
+    return () => {
+      mounted = false
+      if (interval) clearInterval(interval)
     }
-
-    // Poll every 100ms until support is found
-    const interval = setInterval(() => {
-      checkSupport()
-    }, 100)
-
-    return () => clearInterval(interval)
-  }, [mode, supported])
+  }, [mode])
 
   return supported
 }

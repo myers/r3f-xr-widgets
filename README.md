@@ -8,7 +8,9 @@ positioning, and more.
 
 ## Features
 
-- **ResizableWindow** - Draggable, resizable 3D windows with audio feedback and haptic responses
+- **EquirectPlayer** - 360°/180° video player with XR Layer rendering and UIKit controls
+- **HorizonWindow** - Draggable, resizable 3D windows with audio feedback and haptic responses
+- **QuadVideoPlayer** - 2d video player using XR Layer rendering
 - **SplashScreen** - Beautiful XR session entry with VR/AR mode selection
 - **EyeLevelGroup** - Automatic eye-level positioning for comfortable viewing
 - **Audio & Haptics** - Built-in positional audio and controller haptic feedback
@@ -32,7 +34,7 @@ yarn add r3f-xr-widgets
 ### Peer Dependencies
 
 ```bash
-npm install react react-dom three @react-three/fiber @react-three/drei @react-three/xr @react-three/handle
+npm install react react-dom three @react-three/fiber @react-three/drei @react-three/xr @react-three/handle @react-three/uikit @react-three/uikit-default @react-three/uikit-lucide @preact/signals-core @react-spring/three
 ```
 
 ## Quick Start
@@ -69,171 +71,28 @@ function App() {
 }
 ```
 
-## Components
+## API
 
-See all components in action: **[Live Demos](https://icepick.info/r3f-xr-widgets/)**
+For detailed documentation, props, and examples, see the **[Documentation](https://icepick.info/r3f-xr-widgets/)**.
 
-### ResizableWindow
+**Components** — [View all →](https://icepick.info/r3f-xr-widgets/components/)
 
-An interactive 3D window with drag-to-move and resize handles. **[Try it live →](https://icepick.info/r3f-xr-widgets/widgets)**
+- `HorizonWindow`, `ResizableWindow` - Draggable 3D windows
+- `EquirectPlayer`, `QuadVideoPlayer` - video players
+- `SplashScreen`, `EnterXRButton`, `EyeLevelGroup` - XR session utilities
+- `AudioEffects`, `Hover`, `GitHubBadge` - UI helpers
 
-```tsx
-import { ResizableWindow } from 'r3f-xr-widgets'
+**Hooks** — [API Reference →](https://icepick.info/r3f-xr-widgets/api/)
 
-<ResizableWindow
-  position={[0, 1.5, -1]}
-  aspectRatio={16/9}
-  baseScale={0.3}
-  handleColor="#ff9999"
-  initiallyRotateTowardsCamera={true}
-  autoRotateToCamera={false}
->
-  {/* Your content here */}
-</ResizableWindow>
-```
+- `useXRButtons` - XR controller button/thumbstick events
+- `useVideoXRControls` - Video playback with XR controls
+- `useXRSessionModeSupportedPolling` - Check XR mode support
+- `useVideoMetadata` - Video dimensions and metadata
 
-**Props:**
+**Utilities**
 
-- `position` - Position in 3D space `[x, y, z]` (default: `[0, 0, -0.4]`)
-- `aspectRatio` - Width/height ratio (default: `16/9`)
-- `baseScale` - Base size of the window (default: `0.3`)
-- `handleColor` - Color of drag/resize handles (default: `'grey'`)
-- `initiallyRotateTowardsCamera` - Rotate to face camera on mount (default: `true`)
-- `autoRotateToCamera` - Continuously face camera (default: `false`)
-- `onScaleChange` - Callback when window is resized
-
-**Features:**
-
-- Drag bottom handle to move
-- Drag top-right handle to resize
-- Positional audio feedback on interaction
-- Haptic feedback on XR controllers
-- Optional camera-facing rotation
-
-### SplashScreen
-
-Full-screen overlay for entering XR sessions with automatic VR/AR detection. **[Try it live →](https://icepick.info/r3f-xr-widgets/widgets)**
-
-```tsx
-import { SplashScreen } from 'r3f-xr-widgets'
-import { createXRStore } from '@react-three/xr'
-
-const store = createXRStore()
-
-<SplashScreen store={store} modes={['immersive-vr', 'immersive-ar']}>
-  <h1>Welcome to VR</h1>
-  <p>Put on your headset and click Enter VR</p>
-</SplashScreen>
-```
-
-**Props:**
-
-- `store` - XR store from `createXRStore()` (required)
-- `children` - Content to display in the splash screen
-- `modes` - Array of XR modes to support (default: `['immersive-vr', 'immersive-ar']`)
-
-**Features:**
-
-- Automatically hides when XR session starts
-- Detects VR/AR support
-- Customizable content via children
-- Shows single or dual mode buttons
-
-### EyeLevelGroup
-
-Positions children at user's eye level for comfortable viewing.
-
-```tsx
-import { EyeLevelGroup, DEFAULT_EYE_LEVEL } from 'r3f-xr-widgets'
-
-<EyeLevelGroup defaultEyeLevel={DEFAULT_EYE_LEVEL}>
-  <mesh position={[0, 0, -1]}>
-    <boxGeometry />
-    <meshStandardMaterial />
-  </mesh>
-</EyeLevelGroup>
-```
-
-**Props:**
-
-- `defaultEyeLevel` - Default height when not in XR (typically `1.5` meters)
-- `children` - React Three Fiber components to position
-
-**Features:**
-
-- Captures actual eye level when entering XR
-- Uses default height in non-XR mode
-- Captures once per session for stability
-
-### AudioEffects
-
-Global audio effect sources for handle interactions. Must be placed in the scene before any `HandleWithAudio` components.
-
-```tsx
-import { AudioEffects } from 'r3f-xr-widgets'
-
-<XR store={store}>
-  <AudioEffects />
-  {/* Other components */}
-</XR>
-```
-
-### GitHubBadge
-
-A simple GitHub repository link component for demos.
-
-```tsx
-import { GitHubBadge } from 'r3f-xr-widgets'
-
-<GitHubBadge repoUrl="https://github.com/username/repo" />
-```
-
-## Hooks
-
-### useXRSessionModeSupportedPolling
-
-Check if specific XR session modes are supported.
-
-```tsx
-import { useXRSessionModeSupportedPolling } from 'r3f-xr-widgets'
-
-function MyComponent() {
-  const vrSupported = useXRSessionModeSupportedPolling('immersive-vr')
-  const arSupported = useXRSessionModeSupportedPolling('immersive-ar')
-
-  return <div>VR: {vrSupported ? '✓' : '✗'}</div>
-}
-```
-
-## Utilities
-
-### vibrateOnEvent
-
-Trigger haptic feedback on XR controllers.
-
-```tsx
-import { vibrateOnEvent } from 'r3f-xr-widgets'
-
-<mesh onPointerDown={(e) => vibrateOnEvent(e, 0.5, 50)}>
-  <boxGeometry />
-</mesh>
-```
-
-**Parameters:**
-
-- `event` - Three.js pointer event
-- `intensity` - Vibration strength (0-1)
-- `duration` - Duration in milliseconds
-
-### DEFAULT_EYE_LEVEL
-
-Constant for default eye level positioning (1.5 meters).
-
-```tsx
-import { DEFAULT_EYE_LEVEL } from 'r3f-xr-widgets'
-
-<mesh position={[0, DEFAULT_EYE_LEVEL, -1]} />
-```
+- `vibrateOnEvent` - Trigger haptic feedback
+- `DEFAULT_EYE_LEVEL` - Standard eye level (1.5m)
 
 ## Development
 
@@ -258,44 +117,98 @@ pnpm dev
 pnpm typecheck
 ```
 
-### Running Demos
+### Testing
+
+This library uses Vitest with browser mode for automated XR testing.
 
 ```bash
-# Run widgets demo (HTTPS on port 5273)
-pnpm demo
-
-# Run demos landing page (HTTP on port 5173)
-pnpm demo:landing
-
-# Build demos for production
-pnpm demo:build
+# Run all tests
+pnpm test
 ```
 
-The widgets demo showcases all library components with interactive examples. It requires HTTPS to enable WebXR features.
+**Key Features:**
+
+- Test XR interactions without physical hardware
+- Programmatically control virtual XR controllers
+- Run tests in CI/CD pipelines
+
+### Running Demos
+
+To run a demo, cd into its directory and run `pnpm dev`:
+
+```bash
+cd demos/video-player && pnpm dev
+```
+
+Available demos:
+
+- `demos/resizable-window/` - Draggable/resizable windows
+- `demos/horizon-window/` - Horizon-style windows
+- `demos/video-player/` - 360° video player
+- `demos/3d-video/` - 3D video playback
 
 ## Project Structure
 
 ```
 r3f-xr-widgets/
-├── src/
-│   ├── components/       # React components
-│   │   ├── ResizableWindow.tsx
-│   │   ├── SplashScreen.tsx
-│   │   ├── EyeLevelGroup.tsx
-│   │   ├── GitHubBadge.tsx
-│   │   ├── HandleWithAudio.tsx
-│   │   └── Hover.tsx
-│   ├── hooks/            # React hooks
-│   │   └── useXRSessionModeSupportedPolling.ts
-│   ├── utils/            # Utility functions
-│   │   └── vibrateOnEvent.ts
-│   ├── assets/           # 3D models and audio files
-│   └── index.ts          # Main exports
-├── demos/
-│   ├── index.html        # Landing page
-│   └── widgets/          # Interactive demo app
-└── dist/                 # Built library (generated)
+├── src/           # Library source (components, hooks, utils, assets)
+├── demos/         # Demo applications
+├── docs/          # VitePress documentation
+└── dist/          # Built library (generated)
 ```
+
+## Debugging
+
+This library uses the [`debug`](https://www.npmjs.com/package/debug) package for logging. Debug output is disabled by default and can be enabled as needed.
+
+### Browser (Demos)
+
+Enable debug logging in your browser console:
+
+```js
+localStorage.debug = 'r3f-xr-widgets:*'
+// Then refresh the page
+```
+
+To enable specific namespaces:
+
+```js
+localStorage.debug = 'r3f-xr-widgets:hooks:*'  // Only hooks
+localStorage.debug = 'r3f-xr-widgets:components:*'  // Only components
+```
+
+To disable:
+
+```js
+localStorage.removeItem('debug')
+// Then refresh the page
+```
+
+### Tests
+
+Enable debug logging in vitest browser tests using the `DEBUG_LOGGING` environment variable:
+
+```bash
+DEBUG_LOGGING='r3f-xr-widgets:*' pnpm test
+DEBUG_LOGGING='r3f-xr-widgets:hooks:*' pnpm test
+```
+
+**Note:** Colors are disabled by default in tests for cleaner output. This is accomplished by overriding the `debug` package's `useColors` function in the test setup, since the browser implementation of `debug` does not natively support disabling colors via environment variables. To enable colors:
+
+```bash
+DEBUG_COLORS=1 DEBUG_LOGGING='r3f-xr-widgets:*' pnpm test
+```
+
+### Available Namespaces
+
+- `r3f-xr-widgets:*` - All library logs
+- `r3f-xr-widgets:hooks:*` - All hooks (xr-buttons, xr-session)
+- `r3f-xr-widgets:components:*` - All components (enter-xr, horizon-window, video-xr, etc.)
+- `r3f-xr-widgets:materials:*` - Material shaders (edge-uv, arc)
+- `r3f-xr-widgets:test:*` - Test utilities (controller, setup)
+- `r3f-xr-widgets:icons:*` - Icon components
+
+**Note:** In Chromium-based browsers (Chrome, Edge, Brave), you may need to set the console log level to "Verbose" to see debug output.
 
 ## Browser Support
 
@@ -314,7 +227,8 @@ MIT © Myers Carpenter
 ## Acknowledgments
 
 **Core Components Attribution:**
-The `ResizableWindow`, `HandleWithAudio`, and `vibrateOnEvent` utilities were adapted from the [@react-three/xr editor example](https://github.com/pmndrs/xr/tree/main/examples/editor). We're grateful to the pmndrs team for their excellent work on WebXR tooling.
+
+- The `ResizableWindow`, `HandleWithAudio`, and `vibrateOnEvent` utilities were adapted from the [@react-three/xr editor example](https://github.com/pmndrs/xr/tree/main/examples/editor).
 
 **Built with:**
 
@@ -325,7 +239,6 @@ The `ResizableWindow`, `HandleWithAudio`, and `vibrateOnEvent` utilities were ad
 
 ## Links
 
-- [Live Demos](https://icepick.info/r3f-xr-widgets/)
 - [Documentation](https://icepick.info/r3f-xr-widgets/)
-- [Example Source Code](https://github.com/myers/r3f-xr-widgets/tree/main/demos)
-- [Issues](https://github.com/myers/r3f-xr-widgets/issues)
+- [Live Demos](https://icepick.info/r3f-xr-widgets/demos)
+- [GitHub](https://github.com/myers/r3f-xr-widgets)

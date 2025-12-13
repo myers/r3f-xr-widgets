@@ -1,4 +1,14 @@
 import { defineConfig } from 'vitepress'
+import typedocSidebar from '../api/typedoc-sidebar.json'
+
+// Fix typedoc sidebar links (remove /docs prefix)
+const apiSidebar = typedocSidebar.map((section: any) => ({
+  ...section,
+  items: section.items.map((item: any) => ({
+    ...item,
+    link: item.link.replace('/docs', '')
+  }))
+}))
 
 export default defineConfig({
   title: 'r3f-xr-widgets',
@@ -10,7 +20,7 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'Components', link: '/components/' },
       { text: 'API', link: '/api/' },
-      { text: 'Demos', link: 'https://icepick.info/r3f-xr-widgets/widgets/' }
+      { text: 'Demos', link: '/demos' }
     ],
 
     sidebar: {
@@ -33,32 +43,37 @@ export default defineConfig({
       ],
       '/components/': [
         {
-          text: 'Featured Components',
+          text: 'Window Components',
           items: [
-            { text: 'ResizableWindow', link: '/components/resizable-window' },
-            { text: 'SplashScreen', link: '/components/splash-screen' }
+            { text: 'HorizonWindow', link: '/api/functions/HorizonWindow' },
+            { text: 'ResizableWindow', link: '/api/functions/ResizableWindow' }
           ]
         },
         {
-          text: 'Utility Components',
+          text: 'Video Players',
           items: [
-            { text: 'EyeLevelGroup', link: '/components/eye-level-group' },
-            { text: 'Hover', link: '/components/hover' },
-            { text: 'AudioEffects', link: '/components/audio-effects' },
-            { text: 'GitHubBadge', link: '/components/github-badge' }
+            { text: 'EquirectPlayer', link: '/api/functions/EquirectPlayer' },
+            { text: 'QuadVideoPlayer', link: '/api/functions/QuadVideoPlayer' }
+          ]
+        },
+        {
+          text: 'XR Utilities',
+          items: [
+            { text: 'SplashScreen', link: '/api/functions/SplashScreen' },
+            { text: 'EnterXRButton', link: '/api/functions/EnterXRButton' },
+            { text: 'EyeLevelGroup', link: '/api/functions/EyeLevelGroup' }
+          ]
+        },
+        {
+          text: 'UI Components',
+          items: [
+            { text: 'Hover', link: '/api/functions/Hover' },
+            { text: 'AudioEffects', link: '/api/functions/AudioEffects' },
+            { text: 'GitHubBadge', link: '/api/functions/GitHubBadge' }
           ]
         }
       ],
-      '/api/': [
-        {
-          text: 'API Reference',
-          items: [
-            { text: 'Components', link: '/api/components' },
-            { text: 'Hooks', link: '/api/hooks' },
-            { text: 'Utilities', link: '/api/utilities' }
-          ]
-        }
-      ]
+      '/api/': apiSidebar
     },
 
     socialLinks: [
