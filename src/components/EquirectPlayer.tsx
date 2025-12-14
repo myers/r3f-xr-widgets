@@ -65,6 +65,8 @@ export interface EquirectPlayerProps {
   layout?: XRLayerLayout
   /** Name for the Three.js object for scene queries @default "equirect-player" */
   object3DName?: string
+  /** If true, video starts playing automatically when component mounts @default false */
+  autoPlay?: boolean
 }
 
 /**
@@ -109,7 +111,8 @@ export function EquirectPlayer(props: EquirectPlayerProps) {
     videoUrl,
     videoAngle = 180,
     layout = "stereo-left-right",
-    object3DName = "equirect-player"
+    object3DName = "equirect-player",
+    autoPlay = false
   } = props
 
   const video: HTMLVideoElement = useMemo(() => {
@@ -128,6 +131,15 @@ export function EquirectPlayer(props: EquirectPlayerProps) {
       video.load()
     }
   }, [video])
+
+  // Auto-play video when autoPlay prop is true
+  useEffect(() => {
+    if (autoPlay && video) {
+      video.play().catch((err) => {
+        console.warn('[EquirectPlayer] Autoplay failed:', err)
+      })
+    }
+  }, [autoPlay, video])
 
   const videoDimensions = useVideoMetadata(video)
 
